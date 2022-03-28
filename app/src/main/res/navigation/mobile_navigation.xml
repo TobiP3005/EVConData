@@ -3,7 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_home">
+    app:startDestination="@+id/nav_my_car">
+
+    <fragment
+        android:id="@+id/nav_my_car"
+        android:name="com.example.evcondata.ui.home.MyCarFragment"
+        android:label="@string/menu_my_car"
+        tools:layout="@layout/fragment_my_car" />
 
     <fragment
         android:id="@+id/nav_home"
@@ -22,4 +28,9 @@
         android:name="com.example.evcondata.ui.slideshow.SlideshowFragment"
         android:label="@string/menu_slideshow"
         tools:layout="@layout/fragment_slideshow" />
+    <fragment
+        android:id="@+id/mapsFragment"
+        android:name="com.example.evcondata.MapsFragment"
+        android:label="fragment_maps"
+        tools:layout="@layout/fragment_maps" />
 </navigation>

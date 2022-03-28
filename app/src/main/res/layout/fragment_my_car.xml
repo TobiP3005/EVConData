@@ -7,7 +7,7 @@
     tools:context=".ui.home.MyCarFragment">
 
     <TextView
-        android:id="@+id/text_home"
+        android:id="@+id/text_my_car"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"

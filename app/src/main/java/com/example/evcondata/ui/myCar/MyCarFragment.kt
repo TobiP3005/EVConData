@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.evcondata.databinding.FragmentHomeBinding
 
-class HomeFragment : Fragment() {
+class MyCarFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
 
