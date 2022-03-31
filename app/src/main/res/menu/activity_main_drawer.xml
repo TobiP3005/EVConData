@@ -7,23 +7,23 @@
         <item
             android:id="@+id/nav_my_car"
             android:icon="@drawable/ic_home"
-            android:title="My Car" />
+            android:title="@string/my_car" />
         <item
-            android:id="@+id/nav_myConsumption"
+            android:id="@+id/myConsumptionFragment"
             android:icon="@drawable/ic_electric_car"
-            android:title="My Consumption" />
+            android:title="@string/my_consumption" />
         <item
             android:id="@+id/nav_communityConsumption"
             android:icon="@drawable/ic_electric_car"
-            android:title="Community Consumption" />
+            android:title="@string/community_consumption" />
         <item
             android:id="@+id/nav_cars"
             android:icon="@drawable/ic_car"
-            android:title="Cars" />
+            android:title="@string/cars" />
         <item
             android:id="@+id/mapsFragment"
             android:icon="@drawable/ic_map"
-            android:title="Map" />
+            android:title="@string/map" />
 
 <!--        <item-->
 <!--            android:id="@+id/nav_home"-->
