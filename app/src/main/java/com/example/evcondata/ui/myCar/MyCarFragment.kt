@@ -1,4 +1,4 @@
-package com.example.evcondata.ui.myCar
+package com.example.evcondata.ui.home
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -23,7 +23,7 @@ class MyCarFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val homeViewModel =
-            ViewModelProvider(this)[MyCarViewModel::class.java]
+            ViewModelProvider(this).get(MyCarViewModel::class.java)
 
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root

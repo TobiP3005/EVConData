@@ -23,7 +23,7 @@ class MyConsumptionFragment : Fragment() {
     private val item1: Consumption = Consumption("Work", 40, 100,100,15f, 23)
     private val item2: Consumption = Consumption("Roadtrip", 67, 900,200,16f, 31)
     private val item3: Consumption = Consumption("Holiday", 629, 4623,4532,18.4f, 35)
-    private val sampleData: List<Consumption> =
+    private val sampleData: List<Consumption>? =
         mutableListOf(item1, item2, item3, item1, item2, item3, item1, item2, item3, item1, item2, item3, item1, item2, item3, item1, item2, item3, item1, item2, item3, item1, item2, item3)
 
 
@@ -40,11 +40,11 @@ class MyConsumptionFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
+    ): View? {
         binding = FragmentMyConsumptionListBinding.inflate(inflater, container, false)
 
         // Set the adapter
-        consumptionListAdapter = MyConsumptionRecyclerViewAdapter(sampleData)
+        consumptionListAdapter = sampleData?.let { MyConsumptionRecyclerViewAdapter(it) }!!
         binding.consumptionList.adapter = consumptionListAdapter
         binding.consumptionList.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
 

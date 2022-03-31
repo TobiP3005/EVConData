@@ -8,7 +8,6 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.evcondata.databinding.FragmentHomeBinding
-import com.example.evcondata.ui.myCar.MyCarViewModel
 
 class HomeFragment : Fragment() {
 
@@ -24,7 +23,7 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val homeViewModel =
-            ViewModelProvider(this)[MyCarViewModel::class.java]
+            ViewModelProvider(this).get(MyCarViewModel::class.java)
 
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
