@@ -44,7 +44,7 @@
         android:orientation="horizontal">
 
         <TextView
-            android:text="Ø"
+            android:text="@string/average"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/text_margin"
@@ -62,7 +62,7 @@
             android:layout_weight="1" />
 
         <TextView
-            android:text="↑"
+            android:text="@string/arrow_up"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/text_margin"
@@ -74,7 +74,7 @@
             android:layout_margin="@dimen/text_margin"
             android:textAppearance="?attr/textAppearanceListItem" />
         <TextView
-            android:text="↓"
+            android:text="@string/arrow_down"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/text_margin"

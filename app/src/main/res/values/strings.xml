@@ -11,4 +11,12 @@
     <string name="menu_my_car">My car</string>
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
+    <string name="my_car">My Car</string>
+    <string name="my_consumption">My Consumption</string>
+    <string name="community_consumption">Community Consumption</string>
+    <string name="cars">Cars</string>
+    <string name="map">Map</string>
+    <string name="average">Ø</string>
+    <string name="arrow_up">↑</string>
+    <string name="arrow_down">↓</string>
 </resources>

@@ -7,7 +7,7 @@ import com.couchbase.lite.*
 class DatabaseManager {
 
     private var listenerToken: ListenerToken? = null
-    var currentUser: String? = null
+    private var currentUser: String? = null
 
     companion object{
         private var userprofileDatabase: Database? = null
