@@ -20,11 +20,24 @@
     <fragment
         android:id="@+id/mapsFragment"
         android:name="com.example.evcondata.MapsFragment"
-        android:label="fragment_maps"
+        android:label="Community Map"
         tools:layout="@layout/fragment_maps" />
     <fragment
         android:id="@+id/myConsumptionFragment"
         android:name="com.example.evcondata.MyConsumptionFragment"
         android:label="My Consumption"
-        tools:layout="@layout/fragment_my_consumption" />
+        tools:layout="@layout/fragment_my_consumption" >
+        <action
+            android:id="@+id/navigateToAddConsumptionFragment"
+            app:destination="@id/addConsumptionFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/addConsumptionFragment"
+        android:name="com.example.evcondata.AddConsumptionFragment"
+        android:label="New Trip"
+        tools:layout="@layout/fragment_add_consumption" >
+        <action
+            android:id="@+id/navigateToMyConsumptionFragment"
+            app:destination="@id/myConsumptionFragment" />
+    </fragment>
 </navigation>

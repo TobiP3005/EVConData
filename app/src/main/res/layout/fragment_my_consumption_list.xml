@@ -14,8 +14,6 @@
             android:name="com.example.evcondata.MyConsumptionFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
             app:layoutManager="LinearLayoutManager"
             tools:context=".MyConsumptionFragment"
             tools:listitem="@layout/fragment_my_consumption" />

@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.Navigation
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.example.evcondata.databinding.FragmentMyConsumptionListBinding
 import com.example.evcondata.model.Consumption
@@ -49,8 +50,7 @@ class MyConsumptionFragment : Fragment() {
         binding.consumptionList.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
 
         binding.addItemActionButton.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
+            Navigation.findNavController(view).navigate(R.id.navigateToAddConsumptionFragment)
         }
 
         return binding.root
