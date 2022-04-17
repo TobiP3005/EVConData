@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="30dp"
-    tools:context=".AddConsumptionFragment">
+    tools:context=".ui.consumption.AddConsumptionFragment">
 
     <View
         android:id="@+id/centerVerticalShim"
@@ -59,6 +59,7 @@
         android:id="@+id/EditTextName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:inputType="numberSigned"
         app:layout_constraintEnd_toStartOf="@+id/centerVerticalShim"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewName" />
@@ -67,6 +68,7 @@
         android:id="@+id/EditTextDistance"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:inputType="numberSigned"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/centerVerticalShim"
         app:layout_constraintTop_toBottomOf="@+id/textViewDistance" />
@@ -96,6 +98,7 @@
         android:id="@+id/EditTextConsumption"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:inputType="numberSigned"
         app:layout_constraintEnd_toStartOf="@+id/centerVerticalShim"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewConsumption" />
@@ -104,6 +107,7 @@
         android:id="@+id/EditTextTemperature"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:inputType="numberSigned"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/centerVerticalShim"
         app:layout_constraintTop_toBottomOf="@+id/textViewTemperature" />
@@ -132,6 +136,7 @@
         android:id="@+id/EditTextAltitudeUp"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:inputType="numberSigned"
         app:layout_constraintEnd_toStartOf="@+id/centerVerticalShim"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewAltitudeUp" />
@@ -140,6 +145,7 @@
         android:id="@+id/EditTextAltitudeDown"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:inputType="numberSigned"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/centerVerticalShim"
         app:layout_constraintTop_toBottomOf="@+id/textViewAltitudeDown" />

@@ -4,39 +4,22 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import com.example.evcondata.databinding.FragmentHomeBinding
+import com.example.evcondata.databinding.FragmentMyCarBinding
 
 class MyCarFragment : Fragment() {
 
-    private var _binding: FragmentHomeBinding? = null
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
-    private val binding get() = _binding!!
+    private lateinit var binding: FragmentMyCarBinding
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val homeViewModel =
-            ViewModelProvider(this).get(MyCarViewModel::class.java)
+        binding = FragmentMyCarBinding.inflate(layoutInflater)
 
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        val root: View = binding.root
+        binding = FragmentMyCarBinding.inflate(inflater, container, false)
 
-        val textView: TextView = binding.textHome
-        homeViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
-        }
-        return root
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+        return binding.root
     }
 }

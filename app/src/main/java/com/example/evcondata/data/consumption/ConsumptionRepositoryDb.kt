@@ -3,7 +3,6 @@ package com.example.evcondata.data.consumption
 import android.util.Log
 import com.couchbase.lite.*
 import com.example.evcondata.data.ConsumptionDatabase
-import com.example.evcondata.data.DatabaseManager
 import com.example.evcondata.model.Consumption
 import com.example.evcondata.model.ConsumptionModelDTO
 import com.google.gson.Gson
@@ -82,7 +81,7 @@ class ConsumptionRepositoryDb(private val consumptionDatabase: ConsumptionDataba
         return withContext(Dispatchers.IO){
             var result = false
             try {
-                val db = DatabaseManager.getConsumptionDatabase()
+                val db = consumptionDatabase.getConsumptionDatabase()
                 db?.let { database ->
                     val projectDoc = database.getDocument(id)
                     projectDoc?.let { document ->

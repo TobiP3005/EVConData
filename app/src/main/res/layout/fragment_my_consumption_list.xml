@@ -15,7 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layoutManager="LinearLayoutManager"
-            tools:context=".MyConsumptionFragment"
+            tools:context=".ui.consumption.MyConsumptionListFragment"
             tools:listitem="@layout/fragment_my_consumption" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
