@@ -19,4 +19,12 @@
     <string name="average">Ø</string>
     <string name="arrow_up">↑</string>
     <string name="arrow_down">↓</string>
+    <string name="electric_car_symbol">Electric car symbol</string>
+    <string name="name">Name</string>
+    <string name="distance_km">Distance (km)</string>
+    <string name="consumption_kwh">Consumption (kwh)</string>
+    <string name="temperature">Temperature (°C)</string>
+    <string name="altitude_up">Altitude ↑ (m)</string>
+    <string name="altitude_down">Altitude ↓ (m)</string>
+    <string name="save">SAVE</string>
 </resources>
