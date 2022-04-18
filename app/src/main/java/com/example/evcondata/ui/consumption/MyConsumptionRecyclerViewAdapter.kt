@@ -25,11 +25,11 @@ class MyConsumptionRecyclerViewAdapter() : RecyclerView.Adapter<MyConsumptionRec
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = mConsumptionList[position]
         holder.name.text = item.name
-        holder.distance.text = String.format("%.2f km", item.distance)
-        holder.consumption.text = String.format("%.2f kwh", item.consumption)
-        holder.altitudeUp.text = String.format("%d m", item.altitudeUp)
-        holder.altitudeDown.text = String.format("%d m", item.altitudeDown)
-        holder.temperature.text = String.format("%d°C", item.temperature)
+        holder.distance.text = String.format("%s km", if (item.distance == null) "?" else item.distance.toString())
+        holder.consumption.text = String.format("%s kwh", if (item.consumption == null) "?" else item.consumption.toString())
+        holder.altitudeUp.text = String.format("%s m", if (item.altitudeUp == null) "?" else item.altitudeUp.toString())
+        holder.altitudeDown.text = String.format("%s m", if (item.altitudeDown == null) "?" else item.altitudeDown.toString())
+        holder.temperature.text = String.format("%s°C", if (item.temperature == null) "?" else item.temperature.toString())
     }
 
     override fun getItemCount(): Int = mConsumptionList.size

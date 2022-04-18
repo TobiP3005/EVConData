@@ -28,7 +28,7 @@ class ConsumptionRepositoryDb(private val consumptionDatabase: ConsumptionDataba
             } catch (e: Exception) {
                 Log.e(e.message, e.stackTraceToString())
             }
-            return@withContext Consumption(null, null, null, null,null, null)
+            return@withContext Consumption(null, null, null,  null,null,null, null)
         }
     }
 

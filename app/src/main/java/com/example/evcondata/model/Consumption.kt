@@ -8,6 +8,7 @@ class ConsumptionModelDTO(override var item: Consumption) : ModelDTO<Consumption
 
 data class Consumption (
     var name: String?,
+    var datetime: String?,
     var distance: Float?,
     var consumption: Float?,
     var temperature: Int?,
