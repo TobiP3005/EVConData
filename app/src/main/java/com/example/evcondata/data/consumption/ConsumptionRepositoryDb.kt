@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import java.util.*
 
 class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager) : ConsumptionRepository {
 
@@ -65,7 +66,7 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager) : Co
                 val db = databaseManager.getConsumptionDatabase()
                 db?.let { database ->
                     val json = Gson().toJson(consumption)
-                    val doc = MutableDocument("Test", json)
+                    val doc = MutableDocument(UUID.randomUUID().toString(), json)
                     database.save(doc)
                     result = true
                 }

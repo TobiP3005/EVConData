@@ -46,10 +46,10 @@ class DatabaseManager(val context: Context){
 
     private fun initConsumptionDatabase(context: Context, username: String) {
         currentUser = username
-        val directory = String.format("%s/%s", context.filesDir, username)
-        val dbConfig = DatabaseConfigurationFactory.create(directory)
+        val config = DatabaseConfiguration()
+        config.directory = String.format("%s/%s", context.filesDir, username)
         try {
-            consumptionDatabase = Database(consumptionDbName, dbConfig)
+            consumptionDatabase = Database(consumptionDbName, config)
             registerForDatabaseChanges()
         } catch (e: CouchbaseLiteException) {
             e.printStackTrace()
