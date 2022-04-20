@@ -1,4 +1,4 @@
-package com.example.evcondata.ui.consumption
+package com.example.evcondata.ui.consumption.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -6,10 +6,12 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.evcondata.databinding.FragmentMyConsumptionBinding
 import com.example.evcondata.model.Consumption
+import com.example.evcondata.model.ConsumptionModelDTO
 
 class MyConsumptionRecyclerViewAdapter() : RecyclerView.Adapter<MyConsumptionRecyclerViewAdapter.ViewHolder>() {
 
-    private var mConsumptionList: List<Consumption> = ArrayList()
+    var consumptionList = emptyList<ConsumptionModelDTO>()
+        private set
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
@@ -23,7 +25,7 @@ class MyConsumptionRecyclerViewAdapter() : RecyclerView.Adapter<MyConsumptionRec
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = mConsumptionList[position]
+        val item = consumptionList[position].item
         holder.name.text = item.name
         holder.distance.text = String.format("%s km", if (item.distance == null) "?" else item.distance.toString())
         holder.consumption.text = String.format("%s kwh", if (item.consumption == null) "?" else item.consumption.toString())
@@ -32,10 +34,10 @@ class MyConsumptionRecyclerViewAdapter() : RecyclerView.Adapter<MyConsumptionRec
         holder.temperature.text = String.format("%s°C", if (item.temperature == null) "?" else item.temperature.toString())
     }
 
-    override fun getItemCount(): Int = mConsumptionList.size
+    override fun getItemCount(): Int = consumptionList.size
 
-    fun setConsumptionList(consumptionList: List<Consumption>) {
-        mConsumptionList = consumptionList
+    fun setConsumptionList(consumptionList: List<ConsumptionModelDTO>) {
+        this.consumptionList = consumptionList
     }
 
     inner class ViewHolder(binding: FragmentMyConsumptionBinding) :

@@ -30,14 +30,23 @@
         <action
             android:id="@+id/navigateToAddConsumptionFragment"
             app:destination="@id/addConsumptionFragment" />
+        <action
+            android:id="@+id/action_myConsumptionFragment_to_addConsumptionFragment"
+            app:destination="@id/addConsumptionFragment" />
+        <argument
+            android:name="consumptionEntry"
+            app:argType="com.example.evcondata.model.Consumption" />
     </fragment>
     <fragment
         android:id="@+id/addConsumptionFragment"
-        android:name="com.example.evcondata.ui.consumption.AddConsumptionFragment"
+        android:name="com.example.evcondata.ui.consumption.AddEditConsumptionFragment"
         android:label="New Trip"
         tools:layout="@layout/fragment_add_consumption" >
         <action
             android:id="@+id/navigateToMyConsumptionFragment"
             app:destination="@id/myConsumptionFragment" />
+        <argument
+            android:name="consumptionEntry"
+            app:argType="com.example.evcondata.model.ConsumptionModelDTO" />
     </fragment>
 </navigation>

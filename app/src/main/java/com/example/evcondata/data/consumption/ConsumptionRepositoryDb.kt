@@ -34,10 +34,12 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager) : Co
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getConsumptionListFlow(): Flow<List<Consumption>> {
+    override fun getConsumptionListFlow(): Flow<List<ConsumptionModelDTO>> {
         val db = databaseManager.getConsumptionDatabase()
         val query = db?.let { DataSource.database(it) }?.let {
-            QueryBuilder.select(SelectResult.all())
+            QueryBuilder.select(
+                SelectResult.expression(Meta.id),
+                SelectResult.all())
                 .from(it.`as`("item")).where(Expression.property("type").equalTo(Expression.string("consumption")))
         }
         val flow = query!!
@@ -49,24 +51,24 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager) : Co
         return flow
     }
 
-    private fun mapQueryChangeToConsumptionList(queryChange: QueryChange) : List<Consumption>{
-        val consumptionList = mutableListOf<Consumption>()
+    private fun mapQueryChangeToConsumptionList(queryChange: QueryChange) : List<ConsumptionModelDTO>{
+        val consumptionList = mutableListOf<ConsumptionModelDTO>()
         queryChange.results?.let { results ->
             results.forEach() { result ->
-                consumptionList.add(Gson().fromJson(result.toJSON(), ConsumptionModelDTO::class.java).item)
+                consumptionList.add(Gson().fromJson(result.toJSON(), ConsumptionModelDTO::class.java))
             }
         }
         return consumptionList
     }
 
-    override suspend fun saveConsumption(consumption: Consumption): Boolean {
+    override suspend fun saveConsumption(consumption: Consumption, id: String): Boolean {
         return withContext(Dispatchers.IO) {
             var result = false
             try{
                 val db = databaseManager.getConsumptionDatabase()
                 db?.let { database ->
                     val json = Gson().toJson(consumption)
-                    val doc = MutableDocument(UUID.randomUUID().toString(), json)
+                    val doc = MutableDocument(id, json)
                     database.save(doc)
                     result = true
                 }

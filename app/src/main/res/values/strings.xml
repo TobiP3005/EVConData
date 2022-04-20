@@ -27,4 +27,8 @@
     <string name="altitude_up">Altitude ↑ (m)</string>
     <string name="altitude_down">Altitude ↓ (m)</string>
     <string name="save">SAVE</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="update">UPDATE</string>
+    <string name="date">Date</string>
 </resources>

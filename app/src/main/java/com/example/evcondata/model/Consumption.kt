@@ -1,18 +1,22 @@
 package com.example.evcondata.model
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+
 interface ModelDTO<T> {
     var item: T
 }
+@Parcelize
+class ConsumptionModelDTO(override var item: Consumption, var id: String) : ModelDTO<Consumption>, Parcelable
 
-class ConsumptionModelDTO(override var item: Consumption) : ModelDTO<Consumption>
-
+@Parcelize
 data class Consumption (
     var name: String?,
     var datetime: String?,
-    var distance: Float?,
+    var distance: Int?,
     var consumption: Float?,
     var temperature: Int?,
     var altitudeUp: Int?,
     var altitudeDown: Int?,
     var type: String = "consumption"
-)
+) : Parcelable

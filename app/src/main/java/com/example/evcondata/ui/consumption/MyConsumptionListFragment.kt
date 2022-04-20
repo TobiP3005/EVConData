@@ -10,8 +10,13 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
 import com.example.evcondata.R
 import com.example.evcondata.databinding.FragmentMyConsumptionListBinding
+import com.example.evcondata.ui.consumption.adapter.MyConsumptionRecyclerViewAdapter
+import com.example.evcondata.ui.consumption.adapter.SwipeToDeleteCallback
+import com.example.evcondata.ui.consumption.adapter.SwipeToEditCallback
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -22,6 +27,7 @@ import kotlinx.coroutines.launch
 class MyConsumptionListFragment : Fragment() {
 
     private lateinit var binding: FragmentMyConsumptionListBinding
+    private lateinit var consumptionListRecycler: RecyclerView
     private val consumptionViewModel: ConsumptionViewModel by viewModels()
     private lateinit var consumptionListAdapter: MyConsumptionRecyclerViewAdapter
 
@@ -32,16 +38,38 @@ class MyConsumptionListFragment : Fragment() {
     ): View {
         binding = FragmentMyConsumptionListBinding.inflate(inflater, container, false)
 
+        consumptionListRecycler = binding.consumptionList
+
         // Set the adapter
         consumptionListAdapter = MyConsumptionRecyclerViewAdapter()
-        binding.consumptionList.adapter = consumptionListAdapter
-        binding.consumptionList.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+        consumptionListRecycler.adapter = consumptionListAdapter
+        consumptionListRecycler.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
 
         binding.addItemActionButton.setOnClickListener { view ->
             Navigation.findNavController(view).navigate(R.id.navigateToAddConsumptionFragment)
         }
 
         keepConsumptionListUpdated()
+
+        val swipeDeleteHandler = object : SwipeToDeleteCallback(context) {
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val entry = consumptionListAdapter.consumptionList[viewHolder.absoluteAdapterPosition]
+                entry.id.let { consumptionViewModel.deleteConsumption(it) }
+                consumptionListAdapter.notifyDataSetChanged()
+            }
+        }
+
+        val swipeEditHandler = object : SwipeToEditCallback(context) {
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val entry = consumptionListAdapter.consumptionList[viewHolder.absoluteAdapterPosition]
+                view?.let { Navigation.findNavController(it).navigate(MyConsumptionListFragmentDirections.actionMyConsumptionFragmentToAddConsumptionFragment(entry)) }
+                consumptionListAdapter.notifyDataSetChanged()
+            }
+        }
+        val itemTouchHelperDelete = ItemTouchHelper(swipeDeleteHandler)
+        val itemTouchHelperEdit = ItemTouchHelper(swipeEditHandler)
+        itemTouchHelperDelete.attachToRecyclerView(consumptionListRecycler)
+        itemTouchHelperEdit.attachToRecyclerView(consumptionListRecycler)
 
         return binding.root
     }
