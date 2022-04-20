@@ -51,7 +51,7 @@ class MyConsumptionListFragment : Fragment() {
 
         lifecycle.coroutineScope.launch {
             consumptionViewModel.consumptionList
-                .collect { list ->
+                ?.collect { list ->
                     consumptionListAdapter.setConsumptionList(list)
                     consumptionListAdapter.notifyDataSetChanged()
                 }

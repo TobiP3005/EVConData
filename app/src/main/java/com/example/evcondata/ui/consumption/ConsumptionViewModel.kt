@@ -13,8 +13,8 @@ import javax.inject.Inject
 class ConsumptionViewModel @Inject constructor (private val consumptionRepository: ConsumptionRepository)
     : ViewModel() {
 
-    private var _consumptionList: Flow<List<Consumption>> = consumptionRepository.getConsumptionListFlow()!!
-    val consumptionList: Flow<List<Consumption>> get() = _consumptionList
+    val consumptionList: Flow<List<Consumption>>?
+        get() = consumptionRepository.getConsumptionListFlow()
 
     val saveConsumption: (Consumption) -> Boolean = { item: Consumption ->
         var didSave = false

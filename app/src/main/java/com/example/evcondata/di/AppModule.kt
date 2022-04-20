@@ -2,7 +2,7 @@ package com.example.evcondata.di
 
 import android.content.Context
 import com.example.evcondata.BaseApplication
-import com.example.evcondata.data.ConsumptionDatabase
+import com.example.evcondata.data.DatabaseManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,7 +22,7 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideDatabase(@ApplicationContext app: Context): ConsumptionDatabase {
-        return ConsumptionDatabase(app)
+    fun provideDatabase(@ApplicationContext app: Context): DatabaseManager {
+        return DatabaseManager(app)
     }
 }

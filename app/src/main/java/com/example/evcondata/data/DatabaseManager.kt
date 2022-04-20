@@ -4,10 +4,10 @@ import android.content.Context
 import android.util.Log
 import com.couchbase.lite.*
 
-class ConsumptionDatabase(val context: Context){
+class DatabaseManager(val context: Context){
 
     var databases: MutableMap<String, DatabaseResource> = mutableMapOf()
-    var consumptionDbName = "project"
+    var consumptionDbName = "consumptionDb"
     private var consumptionDatabase: Database? = null
 
     private var listenerToken: ListenerToken? = null
@@ -22,7 +22,7 @@ class ConsumptionDatabase(val context: Context){
     }
 
     fun initializeDatabase() {
-        openOrCreateConsumptionDatabase(context, "Tobi")
+        initConsumptionDatabase(context, "Tobi")
     }
 
     fun deleteDatabase() {
@@ -44,12 +44,12 @@ class ConsumptionDatabase(val context: Context){
     }
 
 
-    fun openOrCreateConsumptionDatabase(context: Context, username: String) {
-        val config = DatabaseConfiguration()
-        config.directory = String.format("%s/%s", context.filesDir, username)
+    private fun initConsumptionDatabase(context: Context, username: String) {
         currentUser = username
+        val directory = String.format("%s/%s", context.filesDir, username)
+        val dbConfig = DatabaseConfigurationFactory.create(directory)
         try {
-            consumptionDatabase = Database(consumptionDbName, config)
+            consumptionDatabase = Database(consumptionDbName, dbConfig)
             registerForDatabaseChanges()
         } catch (e: CouchbaseLiteException) {
             e.printStackTrace()

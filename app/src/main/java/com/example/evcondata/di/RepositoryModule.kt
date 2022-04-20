@@ -1,6 +1,6 @@
 package com.example.evcondata.di
 
-import com.example.evcondata.data.ConsumptionDatabase
+import com.example.evcondata.data.DatabaseManager
 import com.example.evcondata.data.consumption.ConsumptionRepository
 import com.example.evcondata.data.consumption.ConsumptionRepositoryDb
 import dagger.Module
@@ -16,10 +16,10 @@ object RepositoryModule {
     @Singleton
     @Provides
     fun provideConsumptionRepository(
-        consumptionDatabase: ConsumptionDatabase
+        databaseManager: DatabaseManager
     ): ConsumptionRepository {
         val repository = ConsumptionRepositoryDb(
-            consumptionDatabase = consumptionDatabase
+            databaseManager = databaseManager
         )
         repository.initializeDatabase()
         return repository

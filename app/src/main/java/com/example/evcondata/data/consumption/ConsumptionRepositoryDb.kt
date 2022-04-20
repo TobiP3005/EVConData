@@ -2,7 +2,7 @@ package com.example.evcondata.data.consumption
 
 import android.util.Log
 import com.couchbase.lite.*
-import com.example.evcondata.data.ConsumptionDatabase
+import com.example.evcondata.data.DatabaseManager
 import com.example.evcondata.model.Consumption
 import com.example.evcondata.model.ConsumptionModelDTO
 import com.google.gson.Gson
@@ -13,12 +13,12 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
-class ConsumptionRepositoryDb(private val consumptionDatabase: ConsumptionDatabase) : ConsumptionRepository {
+class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager) : ConsumptionRepository {
 
     override suspend fun getConsumption(id: String): Consumption {
         return withContext(Dispatchers.IO){
             try {
-                val db = consumptionDatabase.getConsumptionDatabase()
+                val db = databaseManager.getConsumptionDatabase()
                 db?.let { database ->
                     val doc = database.getDocument(id)
                     doc?.let { document  ->
@@ -34,8 +34,7 @@ class ConsumptionRepositoryDb(private val consumptionDatabase: ConsumptionDataba
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getConsumptionListFlow(): Flow<List<Consumption>> {
-
-        val db = consumptionDatabase.getConsumptionDatabase()
+        val db = databaseManager.getConsumptionDatabase()
         val query = db?.let { DataSource.database(it) }?.let {
             QueryBuilder.select(SelectResult.all())
                 .from(it.`as`("item")).where(Expression.property("type").equalTo(Expression.string("consumption")))
@@ -63,7 +62,7 @@ class ConsumptionRepositoryDb(private val consumptionDatabase: ConsumptionDataba
         return withContext(Dispatchers.IO) {
             var result = false
             try{
-                val db = consumptionDatabase.getConsumptionDatabase()
+                val db = databaseManager.getConsumptionDatabase()
                 db?.let { database ->
                     val json = Gson().toJson(consumption)
                     val doc = MutableDocument("Test", json)
@@ -81,7 +80,7 @@ class ConsumptionRepositoryDb(private val consumptionDatabase: ConsumptionDataba
         return withContext(Dispatchers.IO){
             var result = false
             try {
-                val db = consumptionDatabase.getConsumptionDatabase()
+                val db = databaseManager.getConsumptionDatabase()
                 db?.let { database ->
                     val projectDoc = database.getDocument(id)
                     projectDoc?.let { document ->
@@ -97,12 +96,12 @@ class ConsumptionRepositoryDb(private val consumptionDatabase: ConsumptionDataba
     }
 
     override fun initializeDatabase() {
-        return consumptionDatabase.initializeDatabase()
+        return databaseManager.initializeDatabase()
     }
 
     override suspend fun deleteDatabase() {
         return withContext(Dispatchers.IO){
-            return@withContext consumptionDatabase.deleteDatabase()
+            return@withContext databaseManager.deleteDatabase()
         }
     }
 }
