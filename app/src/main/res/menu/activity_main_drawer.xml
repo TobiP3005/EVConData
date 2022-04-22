@@ -17,25 +17,12 @@
             android:icon="@drawable/ic_electric_car"
             android:title="@string/community_consumption" />
         <item
-            android:id="@+id/nav_cars"
+            android:id="@+id/carFragment"
             android:icon="@drawable/ic_car"
             android:title="@string/cars" />
         <item
             android:id="@+id/mapsFragment"
             android:icon="@drawable/ic_map"
             android:title="@string/map" />
-
-<!--        <item-->
-<!--            android:id="@+id/nav_home"-->
-<!--            android:icon="@drawable/ic_menu_camera"-->
-<!--            android:title="@string/menu_home" />-->
-<!--        <item-->
-<!--            android:id="@+id/nav_gallery"-->
-<!--            android:icon="@drawable/ic_menu_gallery"-->
-<!--            android:title="@string/menu_gallery" />-->
-<!--        <item-->
-<!--            android:id="@+id/nav_slideshow"-->
-<!--            android:icon="@drawable/ic_menu_slideshow"-->
-<!--            android:title="@string/menu_slideshow" />-->
     </group>
 </menu>

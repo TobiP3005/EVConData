@@ -49,4 +49,9 @@
             android:name="consumptionEntry"
             app:argType="com.example.evcondata.model.ConsumptionModelDTO" />
     </fragment>
+    <fragment
+        android:id="@+id/carFragment"
+        android:name="com.example.evcondata.ui.car.CarsListFragment"
+        android:label="Electric Cars"
+        tools:layout="@layout/fragment_cars_list" />
 </navigation>
