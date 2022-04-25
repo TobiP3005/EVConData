@@ -14,6 +14,7 @@ import com.example.evcondata.model.Car
  */
 class CarsRecyclerViewAdapter(
     private val context: Activity,
+    private val listener: CarItemListener,
     private val values: List<Car>
 ) : RecyclerView.Adapter<CarsRecyclerViewAdapter.ViewHolder>() {
 
@@ -30,7 +31,7 @@ class CarsRecyclerViewAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = values[position]
-        holder.bind(item)
+        holder.bind(item, listener)
 
         if (!item.imageUri.isNullOrEmpty()) {
             Glide.with(context)
@@ -47,10 +48,10 @@ class CarsRecyclerViewAdapter(
         var recipe: Car? = binding.car
         val imageView: ImageView = binding.itemImage
 
-        fun bind(car: Car) {
+        fun bind(car: Car, listener: CarItemListener) {
             binding.car = car
             binding.root.parent
-            //binding.clickListener = listener
+            binding.clickListener = listener
         }
     }
 }

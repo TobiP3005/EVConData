@@ -17,7 +17,7 @@
             android:icon="@drawable/ic_electric_car"
             android:title="@string/community_consumption" />
         <item
-            android:id="@+id/carFragment"
+            android:id="@+id/carsListFragment"
             android:icon="@drawable/ic_car"
             android:title="@string/cars" />
         <item
