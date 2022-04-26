@@ -41,4 +41,13 @@
     <string name="battery">Battery</string>
     <string name="range">Range</string>
     <string name="km">km</string>
+    <string name="power_symbol">Power symbol</string>
+    <string name="speed_symbol">Speed symbol</string>
+    <string name="max_speed">Max Speed</string>
+    <string name="road_symbol">road symbol</string>
+    <string name="chart_symbol">Chart symbol</string>
+    <string name="consumption">Consumption</string>
+    <string name="battery_symbol">Battery symbol</string>
+    <string name="battery_charging_symbol">Battery charging symbol</string>
+    <string name="charging">Charging</string>
 </resources>
