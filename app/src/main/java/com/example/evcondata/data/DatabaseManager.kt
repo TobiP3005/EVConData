@@ -10,6 +10,9 @@ class DatabaseManager(val context: Context){
     var consumptionDbName = "consumptionDb"
     private var consumptionDatabase: Database? = null
 
+    var carDbName = "carDb"
+    private var carDatabase: Database? = null
+
     private var listenerToken: ListenerToken? = null
     private var currentUser: String? = null
 
@@ -23,6 +26,7 @@ class DatabaseManager(val context: Context){
 
     fun initializeDatabase() {
         initConsumptionDatabase(context, "Tobi")
+        initCarDatabase(context)
     }
 
     fun deleteDatabase() {
@@ -50,25 +54,22 @@ class DatabaseManager(val context: Context){
         config.directory = String.format("%s/%s", context.filesDir, username)
         try {
             consumptionDatabase = Database(consumptionDbName, config)
-            registerForDatabaseChanges()
         } catch (e: CouchbaseLiteException) {
             e.printStackTrace()
         }
     }
 
-    private fun registerForDatabaseChanges() {
-        // Add database change listener
-        listenerToken = consumptionDatabase!!.addChangeListener { change ->
-            for (docId in change.documentIDs) {
-                val doc = consumptionDatabase!!.getDocument(
-                    docId!!
-                )
-                if (doc != null) {
-                    Log.i("DatabaseChangeEvent", "Document was added/updated")
-                } else {
-                    Log.i("DatabaseChangeEvent", "Document was deleted")
-                }
-            }
+    fun getCarDatabase(): Database? {
+        return carDatabase
+    }
+
+    private fun initCarDatabase(context: Context) {
+        val config = DatabaseConfiguration()
+        config.directory = context.filesDir.toString()
+        try {
+            carDatabase = Database(carDbName, config)
+        } catch (e: CouchbaseLiteException) {
+            e.printStackTrace()
         }
     }
 }
