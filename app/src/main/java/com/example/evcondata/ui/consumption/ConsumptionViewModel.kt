@@ -4,9 +4,11 @@ import androidx.lifecycle.*
 import com.example.evcondata.data.consumption.ConsumptionRepository
 import com.example.evcondata.model.Consumption
 import com.example.evcondata.model.ConsumptionModelDTO
+import com.example.evcondata.model.ResultCode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -17,27 +19,15 @@ class ConsumptionViewModel @Inject constructor (private val consumptionRepositor
     val consumptionList: Flow<List<ConsumptionModelDTO>>?
         get() = consumptionRepository.getConsumptionListFlow()
 
-    val saveConsumption: (Consumption, String) -> Boolean = { item: Consumption, id: String ->
-        var didSave = false
-        viewModelScope.launch(Dispatchers.IO){
-            didSave = consumptionRepository.saveConsumption(item, id)
-        }
-        didSave
+    val getConsumption: (String) -> Flow<Consumption?> = { id: String ->
+        consumptionRepository.getConsumption(id)
     }
 
-    val getConsumption: (String) -> Consumption? = { id: String ->
-        var item: Consumption? = null
-        viewModelScope.launch(Dispatchers.IO){
-            item = consumptionRepository.getConsumption(id)
-        }
-        item
+    val saveConsumption: (Consumption, String) -> Flow<ResultCode> = { item: Consumption, id: String ->
+            consumptionRepository.saveConsumption(item, id)
     }
 
-    val deleteConsumption: (String) -> Boolean = { consumptionId: String ->
-        var didDelete = false
-        viewModelScope.launch(Dispatchers.IO){
-            didDelete = consumptionRepository.deleteConsumption(consumptionId)
-        }
-        didDelete
+    val deleteConsumption: (String) -> Flow<ResultCode> = { consumptionId: String ->
+        consumptionRepository.deleteConsumption(consumptionId)
     }
 }

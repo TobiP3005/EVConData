@@ -5,10 +5,12 @@ import com.couchbase.lite.*
 import com.example.evcondata.data.DatabaseManager
 import com.example.evcondata.model.Consumption
 import com.example.evcondata.model.ConsumptionModelDTO
+import com.example.evcondata.model.ResultCode
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -16,22 +18,20 @@ import java.util.*
 
 class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager) : ConsumptionRepository {
 
-    override suspend fun getConsumption(id: String): Consumption {
-        return withContext(Dispatchers.IO){
-            try {
-                val db = databaseManager.getConsumptionDatabase()
-                db?.let { database ->
-                    val doc = database.getDocument(id)
-                    doc?.let { document  ->
-                        return@withContext Gson().fromJson(document.toJSON(), Consumption::class.java)
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e(e.message, e.stackTraceToString())
+    override fun getConsumption(id: String): Flow<Consumption?> = flow {
+        try {
+            val db = databaseManager.getConsumptionDatabase()
+            db?.let { database ->
+                val doc = database.getDocument(id)
+                doc?.let { document  ->
+                    emit(Gson().fromJson(document.toJSON(), Consumption::class.java))
+                } ?: emit(null)
             }
-            return@withContext Consumption(null, null, null,  null,null,null, null)
-        }
-    }
+        } catch (e: Exception) {
+            emit(null)
+            Log.e(e.message, e.stackTraceToString())
+            }
+    }.flowOn(Dispatchers.IO)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getConsumptionListFlow(): Flow<List<ConsumptionModelDTO>> {
@@ -61,42 +61,37 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager) : Co
         return consumptionList
     }
 
-    override suspend fun saveConsumption(consumption: Consumption, id: String): Boolean {
-        return withContext(Dispatchers.IO) {
-            var result = false
-            try{
-                val db = databaseManager.getConsumptionDatabase()
-                db?.let { database ->
-                    val json = Gson().toJson(consumption)
-                    val doc = MutableDocument(id, json)
-                    database.save(doc)
-                    result = true
-                }
-            } catch (e: Exception){
-                Log.e(e.message, e.stackTraceToString())
+    override fun saveConsumption(consumption: Consumption, id: String): Flow<ResultCode> = flow {
+        try{
+            val db = databaseManager.getConsumptionDatabase()
+            db?.let { database ->
+                val json = Gson().toJson(consumption)
+                val doc = MutableDocument(id, json)
+                database.save(doc)
+                emit(ResultCode.SUCCESS)
             }
-            return@withContext result
-        }
-    }
+        } catch (e: Exception){
+            emit(ResultCode.ERROR)
+            Log.e(e.message, e.stackTraceToString())
 
-    override suspend fun deleteConsumption(id: String): Boolean {
-        return withContext(Dispatchers.IO){
-            var result = false
-            try {
-                val db = databaseManager.getConsumptionDatabase()
-                db?.let { database ->
-                    val projectDoc = database.getDocument(id)
-                    projectDoc?.let { document ->
-                        db.delete(document)
-                        result = true
-                    }
-                }
-            } catch (e: java.lang.Exception) {
-                Log.e(e.message, e.stackTraceToString())
-            }
-            return@withContext result
         }
-    }
+    }.flowOn(Dispatchers.IO)
+
+    override fun deleteConsumption(id: String): Flow<ResultCode> = flow {
+        try {
+            val db = databaseManager.getConsumptionDatabase()
+            db?.let { database ->
+                val projectDoc = database.getDocument(id)
+                projectDoc?.let { document ->
+                    db.delete(document)
+                    emit(ResultCode.SUCCESS)
+                }
+            }
+        } catch (e: java.lang.Exception) {
+            emit(ResultCode.ERROR)
+            Log.e(e.message, e.stackTraceToString())
+        }
+    }.flowOn(Dispatchers.IO)
 
     override fun initializeDatabase() {
         return databaseManager.initializeDatabase()

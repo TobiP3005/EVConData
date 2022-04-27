@@ -2,19 +2,20 @@ package com.example.evcondata.data.consumption
 
 import com.example.evcondata.model.Consumption
 import com.example.evcondata.model.ConsumptionModelDTO
+import com.example.evcondata.model.ResultCode
 import kotlinx.coroutines.flow.Flow
 
 interface ConsumptionRepository {
 
     fun initializeDatabase()
 
-    suspend fun getConsumption(id: String): Consumption
-
     fun getConsumptionListFlow(): Flow<List<ConsumptionModelDTO>>?
 
-    suspend fun saveConsumption(consumption: Consumption, id: String): Boolean
+    fun getConsumption(id: String): Flow<Consumption?>
 
-    suspend fun deleteConsumption(id: String) : Boolean
+    fun saveConsumption(consumption: Consumption, id: String): Flow<ResultCode>
+
+    fun deleteConsumption(id: String) : Flow<ResultCode>
 
     suspend fun deleteDatabase()
 }

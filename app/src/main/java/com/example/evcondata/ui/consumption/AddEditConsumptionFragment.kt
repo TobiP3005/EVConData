@@ -9,12 +9,15 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation
 import com.example.evcondata.R
 import com.example.evcondata.databinding.FragmentAddConsumptionBinding
 import com.example.evcondata.model.Consumption
 import com.example.evcondata.model.ConsumptionModelDTO
+import com.example.evcondata.model.ResultCode.*
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -51,7 +54,7 @@ class AddEditConsumptionFragment : Fragment() {
 
         editConsumptionEntry = arguments?.getParcelable("consumptionEntry")
 
-        if (editConsumptionEntry != null){
+        if (editConsumptionEntry != null) {
 
             val item = editConsumptionEntry!!.item
 
@@ -60,7 +63,8 @@ class AddEditConsumptionFragment : Fragment() {
             val dateTimeString = item.datetime
             val localDateTime = LocalDateTime.parse(dateTimeString)
 
-            val datePart = localDateTime.toLocalDate().format(DateTimeFormatter.ofPattern("dd-MM-yy"))
+            val datePart =
+                localDateTime.toLocalDate().format(DateTimeFormatter.ofPattern("dd-MM-yy"))
             val timePart = localDateTime.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm"))
 
             binding.editTextDate.setText(datePart)
@@ -83,7 +87,7 @@ class AddEditConsumptionFragment : Fragment() {
 
         manageDateTimeTextView()
 
-        binding.buttonSave.setOnClickListener{ view ->
+        binding.buttonSave.setOnClickListener { view ->
 
             val consumptionEntry = Consumption(
                 binding.EditTextName.text.toString(),
@@ -92,33 +96,53 @@ class AddEditConsumptionFragment : Fragment() {
                 binding.EditTextConsumption.text.toString().toFloatOrNull(),
                 binding.EditTextTemperature.text.toString().toIntOrNull(),
                 binding.EditTextAltitudeUp.text.toString().toIntOrNull(),
-                binding.EditTextAltitudeDown.text.toString().toIntOrNull())
+                binding.EditTextAltitudeDown.text.toString().toIntOrNull()
+            )
 
             val id: String = if (editConsumptionEntry != null)
                 editConsumptionEntry!!.id
             else
                 UUID.randomUUID().toString()
 
-            val didSave = consumptionViewModel.saveConsumption(consumptionEntry, id)
-
-            if (didSave) {
-                Toast.makeText(context, "Successfully saved consumption!", Toast.LENGTH_SHORT).show()
-                Navigation.findNavController(view).navigate(R.id.navigateToMyConsumptionFragment)
+            lifecycle.coroutineScope.launch {
+                consumptionViewModel.saveConsumption(consumptionEntry, id)
+                    .collect { resultCode ->
+                        when (resultCode) {
+                            SUCCESS -> {
+                                Toast.makeText(
+                                    context,
+                                    "Successfully saved consumption!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                Navigation.findNavController(view)
+                                    .navigate(R.id.navigateToMyConsumptionFragment)
+                            }
+                            ERROR -> Toast.makeText(
+                                context,
+                                "Failed to save consumption!",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }
             }
-            else
-                Toast.makeText(context, "Failed to save consumption!", Toast.LENGTH_LONG).show()
         }
         return binding.root
     }
 
     private fun getDateTimeString(): String {
-        val datePart: LocalDate? = LocalDate.parse(binding.editTextDate.text.toString(), DateTimeFormatter.ofPattern("dd-MM-yy"))
-        val timePart: LocalTime? = LocalTime.parse(binding.editTextTime.text.toString(), DateTimeFormatter.ofPattern("HH:mm"))
+        val datePart: LocalDate? = LocalDate.parse(
+            binding.editTextDate.text.toString(),
+            DateTimeFormatter.ofPattern("dd-MM-yy")
+        )
+        val timePart: LocalTime? = LocalTime.parse(
+            binding.editTextTime.text.toString(),
+            DateTimeFormatter.ofPattern("HH:mm")
+        )
 
         return LocalDateTime.of(datePart, timePart).toString()
     }
 
-    private fun manageDateTimeTextView(){
+    private fun manageDateTimeTextView() {
 
 
         binding.editTextDate.setText(dateFormat.format(Date()))
@@ -129,7 +153,7 @@ class AddEditConsumptionFragment : Fragment() {
             val month = myCalendar.get(Calendar.MONTH)
             val day = myCalendar.get(Calendar.DAY_OF_MONTH)
 
-            val dialog = DatePickerDialog(requireContext(), mDateSetListener,  year, month, day)
+            val dialog = DatePickerDialog(requireContext(), mDateSetListener, year, month, day)
             dialog.show()
         }
 
@@ -146,7 +170,7 @@ class AddEditConsumptionFragment : Fragment() {
             val hour = myCalendar.get(Calendar.HOUR_OF_DAY)
             val minute = myCalendar.get(Calendar.MINUTE)
 
-            val dialog = TimePickerDialog(requireContext(), mTimeSetListener,  hour, minute, false)
+            val dialog = TimePickerDialog(requireContext(), mTimeSetListener, hour, minute, false)
             dialog.show()
         }
 
