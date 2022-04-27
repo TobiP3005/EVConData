@@ -1,4 +1,4 @@
-package com.example.evcondata.data.consumption
+package com.example.evcondata.data.car
 
 import com.couchbase.lite.*
 import com.example.evcondata.data.DatabaseManager

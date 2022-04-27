@@ -1,4 +1,4 @@
-package com.example.evcondata.data.consumption
+package com.example.evcondata.data.car
 
 import com.example.evcondata.model.Car
 import kotlinx.coroutines.flow.Flow
