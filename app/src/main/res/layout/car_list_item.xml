@@ -88,7 +88,6 @@
                     android:layout_height="230dp"
                     android:adjustViewBounds="true"
                     android:layout_gravity="center_horizontal"
-                    android:src="@drawable/peugeot_e208"
                     android:contentDescription="@string/description_image_of_the_car"
                     android:onClick="@{() -> clickListener.onClick(car)}"/>
 

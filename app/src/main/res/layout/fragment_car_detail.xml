@@ -27,7 +27,6 @@
                     android:adjustViewBounds="true"
                     android:layout_gravity="center_horizontal"
                     android:layout_span="2"
-                    android:src="@drawable/peugeot_e208"
                     android:contentDescription="@string/description_image_of_the_car" />
             </TableRow>
 
