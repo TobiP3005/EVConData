@@ -19,10 +19,17 @@ class UserPreferencesRepository @Inject constructor(
 ){
 
     private val sessionPrefKey = stringPreferencesKey("sessionToken")
+    private val usernamePrefKey = stringPreferencesKey("username")
 
     suspend fun setSessionToken(sessionToken: String) {
         dataStore.edit { settings ->
             settings[sessionPrefKey] = sessionToken
+        }
+    }
+
+    suspend fun setUsername(username: String) {
+        dataStore.edit { settings ->
+            settings[usernamePrefKey] = username
         }
     }
 
@@ -43,6 +50,14 @@ class UserPreferencesRepository @Inject constructor(
         return runBlocking {
             dataStore.data.map { preferences ->
                 preferences[sessionPrefKey]
+            }
+        }
+    }
+
+    fun getUsername() {
+        return runBlocking {
+            dataStore.data.map { preferences ->
+                preferences[usernamePrefKey]
             }
         }
     }

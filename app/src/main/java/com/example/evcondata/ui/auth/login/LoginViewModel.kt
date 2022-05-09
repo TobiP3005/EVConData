@@ -31,6 +31,7 @@ class LoginViewModel @Inject constructor(private val loginRepository: LoginRepos
             if (result is AuthResult.Success) {
                 _loginResult.postValue(LoginResult(success = LoggedInUserView(displayName = result.data.username)))
                 userPreferencesRepository.setSessionToken(result.data.sessionToken)
+                userPreferencesRepository.setUsername(result.data.username)
             } else if (result is AuthResult.Error){
                 _loginResult.postValue(LoginResult(error = R.string.login_failed))
             }
@@ -49,6 +50,7 @@ class LoginViewModel @Inject constructor(private val loginRepository: LoginRepos
                 if (result is AuthResult.Success) {
                     _loginResult.postValue(LoginResult(success = LoggedInUserView(displayName = result.data.username)))
                     userPreferencesRepository.setSessionToken(result.data.sessionToken)
+                    userPreferencesRepository.setUsername(result.data.username)
                 } else if (result is AuthResult.Error) {
                     _loginResult.postValue(LoginResult(error = R.string.login_failed))
                 }
