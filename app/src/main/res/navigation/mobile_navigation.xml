@@ -67,4 +67,16 @@
             android:name="car"
             app:argType="com.example.evcondata.model.Car" />
     </fragment>
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.example.evcondata.ui.auth.login.LoginFragment"
+        android:label="Login"
+        tools:layout="@layout/fragment_login">
+<!--        <action-->
+<!--            android:id="@+id/action_nav_login_to_registerFragment"-->
+<!--            app:destination="@id/registerFragment" />-->
+        <action
+            android:id="@+id/action_login_to_myCar"
+            app:destination="@id/nav_my_car" />
+    </fragment>
 </navigation>

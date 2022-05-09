@@ -1,0 +1,62 @@
+package com.example.evcondata.data.auth
+
+import com.example.evcondata.data.auth.model.LoggedInUser
+import com.example.evcondata.data.network.UserServices
+import com.example.evcondata.data.network.request.LoginRequest
+import com.example.evcondata.model.ResultCode
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.ResponseBody
+import java.io.IOException
+import javax.inject.Inject
+
+/**
+ * Class that handles authentication w/ login credentials and retrieves user information.
+ */
+class LoginDataSource @Inject constructor(private val userServices: UserServices) {
+
+    suspend fun login(username: String, password: String): AuthResult<LoggedInUser> {
+
+        return withContext(Dispatchers.IO){
+            try {
+                val response = userServices.login(LoginRequest(username, password))
+                if (response.isSuccessful){
+                    val header = response.headers().get("Set-Cookie")
+                    val arr: List<String> = header!!.split("=")
+                    var jsessionid = arr[1]
+                    jsessionid = jsessionid.substring(0, jsessionid.length - 6)
+                    return@withContext AuthResult.Success(LoggedInUser(username, jsessionid))
+                } else{
+                    return@withContext AuthResult.Error(IOException("Login Failed"))
+                }
+            } catch (e: Throwable) {
+                return@withContext AuthResult.Error(IOException("Error logging in", e))
+            }
+        }
+    }
+
+    suspend fun login(firstName: String, lastName: String, googleToken: String): AuthResult<LoggedInUser> {
+
+        return withContext(Dispatchers.IO){
+            try {
+                val response = userServices.login("Bearer $googleToken")
+                if (response.isSuccessful){
+                    val header = response.headers().get("Set-Cookie")
+                    val arr: List<String> = header!!.split("=")
+                    var jsessionid = arr[1]
+                    jsessionid = jsessionid.substring(0, jsessionid.length - 6)
+
+                    return@withContext AuthResult.Success(LoggedInUser(firstName, jsessionid))
+                } else{
+                    return@withContext AuthResult.Error(IOException("Login Failed"))
+                }
+            } catch (e: Throwable) {
+                return@withContext AuthResult.Error(IOException("Error logging in", e))
+            }
+        }
+    }
+
+    fun logout() {
+        // TODO: revoke authentication
+    }
+}
