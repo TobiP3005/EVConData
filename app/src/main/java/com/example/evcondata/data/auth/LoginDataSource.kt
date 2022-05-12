@@ -21,11 +21,12 @@ class LoginDataSource @Inject constructor(private val userServices: UserServices
             try {
                 val response = userServices.login(LoginRequest(username, password))
                 if (response.isSuccessful){
+                    val userId = response.body()!!.userCtx.name
                     val header = response.headers().get("Set-Cookie")
                     val arr: List<String> = header!!.split("=")
                     var jsessionid = arr[1]
                     jsessionid = jsessionid.substring(0, jsessionid.length - 6)
-                    return@withContext AuthResult.Success(LoggedInUser(username, jsessionid))
+                    return@withContext AuthResult.Success(LoggedInUser(username, userId, jsessionid))
                 } else{
                     return@withContext AuthResult.Error(IOException("Login Failed"))
                 }
@@ -41,12 +42,14 @@ class LoginDataSource @Inject constructor(private val userServices: UserServices
             try {
                 val response = userServices.login("Bearer $googleToken")
                 if (response.isSuccessful){
+                    val body = response.body()
+                    val userId = body!!.userCtx.name
                     val header = response.headers().get("Set-Cookie")
                     val arr: List<String> = header!!.split("=")
-                    var jsessionid = arr[1]
-                    jsessionid = jsessionid.substring(0, jsessionid.length - 6)
+                    var sessionid = arr[1]
+                    sessionid = sessionid.substring(0, sessionid.length - 6)
 
-                    return@withContext AuthResult.Success(LoggedInUser(firstName, jsessionid))
+                    return@withContext AuthResult.Success(LoggedInUser(firstName, userId, sessionid))
                 } else{
                     return@withContext AuthResult.Error(IOException("Login Failed"))
                 }

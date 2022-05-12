@@ -51,6 +51,7 @@ class LoginViewModel @Inject constructor(private val loginRepository: LoginRepos
                     _loginResult.postValue(LoginResult(success = LoggedInUserView(displayName = result.data.username)))
                     userPreferencesRepository.setSessionToken(result.data.sessionToken)
                     userPreferencesRepository.setUsername(result.data.username)
+                    userPreferencesRepository.setUserId(result.data.userId)
                 } else if (result is AuthResult.Error) {
                     _loginResult.postValue(LoginResult(error = R.string.login_failed))
                 }

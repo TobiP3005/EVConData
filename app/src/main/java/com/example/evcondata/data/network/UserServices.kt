@@ -8,10 +8,18 @@ interface UserServices {
     @POST("ev-data/_session")
     suspend fun login(
         @Body loginRequest: LoginRequest)
-    : Response<Any>
+    : Response<LoginBody>
 
     @POST("ev-data/_session")
     suspend fun login(
         @Header("Authorization") authHeader: String?
-    ): Response<Any>
+    ): Response<LoginBody>
 }
+
+data class LoginBody(
+    val userCtx: Name
+    )
+
+data class Name(
+    val name: String
+)

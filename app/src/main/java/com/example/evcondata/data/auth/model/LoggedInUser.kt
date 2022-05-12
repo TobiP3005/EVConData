@@ -5,5 +5,6 @@ package com.example.evcondata.data.auth.model
  */
 data class LoggedInUser(
     val username: String,
+    val userId: String,
     val sessionToken: String
 )
