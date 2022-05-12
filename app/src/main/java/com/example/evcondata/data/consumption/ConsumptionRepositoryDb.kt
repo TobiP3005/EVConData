@@ -3,6 +3,7 @@ package com.example.evcondata.data.consumption
 import android.util.Log
 import com.couchbase.lite.*
 import com.example.evcondata.data.DatabaseManager
+import com.example.evcondata.data.auth.UserPreferencesRepository
 import com.example.evcondata.model.Consumption
 import com.example.evcondata.model.ConsumptionModelDTO
 import com.example.evcondata.model.ResultCode
@@ -16,7 +17,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.util.*
 
-class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager) : ConsumptionRepository {
+class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, userPreferencesRepository: UserPreferencesRepository) : ConsumptionRepository {
+
+    val userPref = userPreferencesRepository
 
     override fun getConsumption(id: String): Flow<Consumption?> = flow {
         try {
@@ -40,7 +43,9 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager) : Co
             QueryBuilder.select(
                 SelectResult.expression(Meta.id),
                 SelectResult.all())
-                .from(it.`as`("item")).where(Expression.property("type").equalTo(Expression.string("consumption")))
+                .from(it.`as`("item"))
+                .where(Expression.property("type").equalTo(Expression.string("consumption"))
+                    .and(Expression.property("owner").equalTo(Expression.string(userPref.userId))))
         }
         val flow = query!!
             .queryChangeFlow()
@@ -63,6 +68,7 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager) : Co
 
     override fun saveConsumption(consumption: Consumption, id: String): Flow<ResultCode> = flow {
         try{
+            consumption.owner = userPref.userId
             val db = databaseManager.getConsumptionDatabase()
             db?.let { database ->
                 val json = Gson().toJson(consumption)

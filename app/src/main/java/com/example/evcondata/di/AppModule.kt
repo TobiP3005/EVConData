@@ -10,6 +10,7 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.example.evcondata.BaseApplication
 import com.example.evcondata.data.DatabaseManager
+import com.example.evcondata.data.auth.UserPreferencesRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,8 +35,10 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideDatabase(@ApplicationContext app: Context): DatabaseManager {
-        return DatabaseManager(app)
+    fun provideDatabase(@ApplicationContext app: Context, userPreferencesDataStore: UserPreferencesRepository): DatabaseManager {
+        val dbManager = DatabaseManager(app, userPreferencesDataStore)
+        dbManager.initializeDatabase()
+        return dbManager
     }
 
     @Singleton
