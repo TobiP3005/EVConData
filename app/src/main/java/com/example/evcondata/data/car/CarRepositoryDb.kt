@@ -15,12 +15,12 @@ class CarRepositoryDb(private val databaseManager: DatabaseManager) : CarReposit
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getCarListFlow(): Flow<List<Car>> {
-        val db = databaseManager.getCarDatabase()
+        val db = databaseManager.getEvDataDatabase()
         val query = db?.let { DataSource.database(it) }?.let {
             QueryBuilder.select(
                 SelectResult.expression(Meta.id),
                 SelectResult.all())
-                .from(it.`as`("item")).where(Expression.property("type").equalTo(Expression.string("consumption")))
+                .from(it.`as`("item")).where(Expression.property("type").equalTo(Expression.string("car")))
         }
         val flow = query!!
             .queryChangeFlow()
@@ -34,7 +34,7 @@ class CarRepositoryDb(private val databaseManager: DatabaseManager) : CarReposit
     private fun mapQueryChangeToCarList(queryChange: QueryChange) : List<Car>{
         val carList = mutableListOf<Car>()
         queryChange.results?.let { results ->
-            results.forEach() { result ->
+            results.forEach { result ->
                 carList.add(Gson().fromJson(result.toJSON(), CarModelDTO::class.java).item)
             }
         }
