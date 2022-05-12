@@ -3,30 +3,32 @@ package com.example.evcondata.data
 import android.content.Context
 import android.util.Log
 import com.couchbase.lite.*
+import com.example.evcondata.data.auth.UserPreferencesRepository
+import java.net.URI
+import java.net.URISyntaxException
 
-class DatabaseManager(val context: Context){
+class DatabaseManager(val context: Context, userPreferencesRepository: UserPreferencesRepository){
+
+    val userPref = userPreferencesRepository
+
+    val syncGatewayEndpoint = "ws://adac-icphig-cbtest.germanywestcentral.cloudapp.azure.com:4984"
 
     var databases: MutableMap<String, DatabaseResource> = mutableMapOf()
-    var consumptionDbName = "consumptionDb"
-    private var consumptionDatabase: Database? = null
+    var evDataDbName = "ev-data"
+    private var evDatabase: Database? = null
 
-    var carDbName = "carDb"
-    private var carDatabase: Database? = null
-
-    private var listenerToken: ListenerToken? = null
     private var currentUser: String? = null
+
+    private var replicator: Replicator? = null
+    private var replicatorListenerToken: ListenerToken? = null
 
     init {
         CouchbaseLite.init(context)
     }
 
-    fun getCurrentUserDocId(): String {
-        return "user::$currentUser"
-    }
-
     fun initializeDatabase() {
-        initConsumptionDatabase(context, "Tobi")
-        initCarDatabase(context)
+        initEvDataDatabase(context, userPref.userId)
+        startPullReplication()
     }
 
     fun deleteDatabase() {
@@ -44,32 +46,62 @@ class DatabaseManager(val context: Context){
     }
 
     fun getConsumptionDatabase(): Database? {
-        return consumptionDatabase
+        return evDatabase
     }
 
 
-    private fun initConsumptionDatabase(context: Context, username: String) {
+    private fun initEvDataDatabase(context: Context, username: String) {
         currentUser = username
         val config = DatabaseConfiguration()
         config.directory = String.format("%s/%s", context.filesDir, username)
         try {
-            consumptionDatabase = Database(consumptionDbName, config)
+            evDatabase = Database(evDataDbName, config)
         } catch (e: CouchbaseLiteException) {
             e.printStackTrace()
         }
     }
 
-    fun getCarDatabase(): Database? {
-        return carDatabase
+    fun getEvDataDatabase(): Database? {
+        return evDatabase
     }
 
-    private fun initCarDatabase(context: Context) {
-        val config = DatabaseConfiguration()
-        config.directory = context.filesDir.toString()
+    // tag::startPushAndPullReplicationForCurrentUser[]
+    private fun startPullReplication()
+    {
+        var url: URI? = null
         try {
-            carDatabase = Database(carDbName, config)
-        } catch (e: CouchbaseLiteException) {
+            url = URI(
+                String.format(
+                    "%s/%s",
+                    syncGatewayEndpoint,
+                    evDataDbName
+                )
+            )
+        } catch (e: URISyntaxException) {
             e.printStackTrace()
         }
+
+        val session = userPref.sessionToken
+        replicator =
+            Replicator(
+                ReplicatorConfigurationFactory.create(
+                    database = evDatabase,
+                    target = URLEndpoint(url!!),
+                    type = ReplicatorType.PUSH_AND_PULL,
+                    true,
+                    authenticator = SessionAuthenticator(session)
+                    )
+                )
+
+        replicatorListenerToken = replicator!!.addChangeListener { change ->
+            if (change.replicator.status.activityLevel == ReplicatorActivityLevel.IDLE) {
+                Log.e("Replication Comp Log", "Scheduler Completed")
+            }
+            if (change.replicator.status.activityLevel == ReplicatorActivityLevel.STOPPED || change.replicator.status.activityLevel == ReplicatorActivityLevel.OFFLINE) {
+                Log.e("Rep Scheduler  Log", "ReplicationTag Stopped")
+            }
+        }
+
+        replicator?.start()
     }
 }
