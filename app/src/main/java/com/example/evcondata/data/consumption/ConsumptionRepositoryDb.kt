@@ -147,6 +147,23 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
         return flow
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private suspend fun purgeWorkaround() {
+        val repl = databaseManager.getReplicator()
+        val replicatedDocs = repl!!.documentReplicationFlow()
+            .map { update -> update.documents }
+            .flowOn(Dispatchers.IO)
+
+        replicatedDocs
+            .collect { list ->
+                val purgeBool = list.any { it.flags.contains(DocumentFlag.ACCESS_REMOVED) }
+                if (purgeBool){
+                    saveConsumption(Consumption(null, null, null, null, null,null,null,null,null, true), "purgeWorkaround").collect()
+                    deleteConsumption("purgeWorkaround").collect()
+                }
+            }
+    }
+
     private fun mapQueryChangeToConsumptionList(queryChange: QueryChange) : List<ConsumptionModelDTO>{
         val consumptionList = mutableListOf<ConsumptionModelDTO>()
         queryChange.results?.let { results ->
