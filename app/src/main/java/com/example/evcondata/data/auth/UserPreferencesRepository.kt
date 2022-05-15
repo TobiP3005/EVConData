@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
@@ -16,6 +17,7 @@ class UserPreferencesRepository @Inject constructor(
     private val sessionPrefKey = stringPreferencesKey("sessionToken")
     private val usernamePrefKey = stringPreferencesKey("username")
     private val userIdPrefKey = stringPreferencesKey("userId")
+    private val sharedConBoolPrefKey = stringPreferencesKey("sharedConsumptionBool")
 
     suspend fun setSessionToken(sessionToken: String) {
         dataStore.edit { settings ->
@@ -32,6 +34,12 @@ class UserPreferencesRepository @Inject constructor(
     suspend fun setUserId(userId: String) {
         dataStore.edit { settings ->
             settings[userIdPrefKey] = userId
+        }
+    }
+
+    suspend fun setSharedConBool(shared: String) {
+        dataStore.edit { settings ->
+            settings[sharedConBoolPrefKey] = shared
         }
     }
 
@@ -66,6 +74,19 @@ class UserPreferencesRepository @Inject constructor(
         runBlocking {
             dataStore.data.map { preferences ->
                 preferences[usernamePrefKey]
-            }
+            }.first()
     }
+
+    val sharedConsumption =
+        runBlocking {
+            dataStore.data.map { preferences ->
+                preferences[sharedConBoolPrefKey]
+            }.first().toBoolean()
+    }
+
+    val sharedConFlow: Flow<String> = dataStore.data
+        .map { preferences ->
+            // No type safety.
+            preferences[sharedConBoolPrefKey] ?: ""
+        }
 }
