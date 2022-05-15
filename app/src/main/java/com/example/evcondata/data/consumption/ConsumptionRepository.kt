@@ -17,6 +17,10 @@ interface ConsumptionRepository {
 
     fun saveConsumption(consumption: Consumption, id: String): Flow<ResultCode>
 
+    fun publishData(publishDataBool: Boolean)
+
+    fun sharedConFlow(): Flow<String>
+
     fun deleteConsumption(id: String) : Flow<ResultCode>
 
     suspend fun deleteDatabase()

@@ -30,4 +30,12 @@ class ConsumptionViewModel @Inject constructor (private val consumptionRepositor
     val deleteConsumption: (String) -> Flow<ResultCode> = { consumptionId: String ->
         consumptionRepository.deleteConsumption(consumptionId)
     }
+
+    val updatePublishData: (Boolean) -> Unit = { publishDataBool: Boolean ->
+        consumptionRepository.publishData(publishDataBool)
+    }
+
+    val sharedConFlow: Flow<String>
+        get() = consumptionRepository.sharedConFlow()
+
 }

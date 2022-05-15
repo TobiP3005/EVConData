@@ -58,6 +58,17 @@ class MyConsumptionListFragment : Fragment() {
 
         keepConsumptionListUpdated()
 
+        lifecycle.coroutineScope.launch {
+            consumptionViewModel.sharedConFlow
+                .collect { bool ->
+                    binding.publishDataSwitch.isChecked = bool.toBoolean()
+                }
+        }
+
+        binding.publishDataSwitch.setOnCheckedChangeListener { _, isChecked ->
+            consumptionViewModel.updatePublishData(isChecked)
+        }
+
         val swipeDeleteHandler = object : SwipeToDeleteCallback(context) {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val entry =

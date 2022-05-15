@@ -7,7 +7,21 @@
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+        <Switch
+            android:id="@+id/publishDataSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/publish_data"
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/consumption_list"
@@ -18,6 +32,7 @@
             tools:context=".ui.consumption.MyConsumptionListFragment"
             tools:listitem="@layout/fragment_my_consumption" />
 
+        </LinearLayout>
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/addItemActionButton"
             android:layout_width="wrap_content"
@@ -25,7 +40,8 @@
             android:layout_gravity="bottom|end"
             android:clickable="true"
             android:layout_margin="@dimen/fab_margin"
-            app:srcCompat="@drawable/ic_add" />
+            app:srcCompat="@drawable/ic_add"
+            android:contentDescription="Button to add a new consumption entry" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

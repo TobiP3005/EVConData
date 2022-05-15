@@ -7,19 +7,46 @@ import com.example.evcondata.data.auth.UserPreferencesRepository
 import com.example.evcondata.model.Consumption
 import com.example.evcondata.model.ConsumptionModelDTO
 import com.example.evcondata.model.ResultCode
+import com.example.evcondata.model.Setting
 import com.google.gson.Gson
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.withContext
-import java.util.*
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
+
 
 class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, userPreferencesRepository: UserPreferencesRepository) : ConsumptionRepository {
 
-    val userPref = userPreferencesRepository
+    private val userPref = userPreferencesRepository
+
+    init {
+        setSharedConsumptionPref()
+    }
+
+    private fun setSharedConsumptionPref(){
+        var shared = "false"
+        try{
+            val userID = userPref.userId
+            val db = databaseManager.getConsumptionDatabase()
+            val doc = db?.getDocument("settings:$userID")
+            if (doc != null){
+                shared = doc.getBoolean("publicConsumption").toString()
+            }else {
+                val json = Gson().toJson(Setting(false))
+                val settingsDoc = MutableDocument("settings:$userID", json)
+
+                db?.save(settingsDoc)
+            }
+        } catch (e: Exception){
+            Log.e(e.message, e.stackTraceToString())
+        }
+
+        CoroutineScope(Dispatchers.IO).launch {
+            userPref.setSharedConBool(shared)
+        }
+    }
+
+    override fun sharedConFlow(): Flow<String> {
+        return userPref.sharedConFlow
+    }
 
     override fun getConsumption(id: String): Flow<Consumption?> = flow {
         try {
@@ -35,6 +62,48 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
             Log.e(e.message, e.stackTraceToString())
             }
     }.flowOn(Dispatchers.IO)
+
+
+    override fun publishData(publishDataBool: Boolean){
+
+        val sharedBool = userPref.sharedConsumption
+
+        if (publishDataBool != sharedBool){
+            CoroutineScope(Dispatchers.IO).launch {
+                userPref.setSharedConBool(publishDataBool.toString())
+            }
+
+            val db = databaseManager.getConsumptionDatabase()
+
+            val json = Gson().toJson(Setting(publishDataBool))
+
+            val docOrgigin = db?.getDocument("settings:"+userPref.userId)
+
+            val doc = MutableDocument(docOrgigin?.id, json)
+            db?.save(doc)
+
+            val query = db?.let { DataSource.database(it) }?.let {
+                QueryBuilder.select(
+                    SelectResult.expression(Meta.id))
+                    .from(it.`as`("item"))
+                    .where(Expression.property("type").equalTo(Expression.string("consumption"))
+                        .and(Expression.property("owner").equalTo(Expression.string(userPref.userId))))
+            }
+            try {
+                val rs = query!!.execute()
+                for (result in rs) {
+                    val id: String? = result.getString("id")
+                    if (id != null){
+                        val doc: MutableDocument = db.getDocument(id)!!.toMutable()
+                        doc.setBoolean("public", publishDataBool)
+                        db.save(doc)
+                    }
+                }
+            } catch (e: CouchbaseLiteException) {
+                throw e
+            }
+        }
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getConsumptionListFlow(): Flow<List<ConsumptionModelDTO>> {
@@ -90,7 +159,9 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
 
     override fun saveConsumption(consumption: Consumption, id: String): Flow<ResultCode> = flow {
         try{
+            consumption.username = userPref.username
             consumption.owner = userPref.userId
+            consumption.public = userPref.sharedConsumption
             val db = databaseManager.getConsumptionDatabase()
             db?.let { database ->
                 val json = Gson().toJson(consumption)
