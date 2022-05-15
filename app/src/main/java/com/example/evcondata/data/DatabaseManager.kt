@@ -49,6 +49,10 @@ class DatabaseManager(val context: Context, userPreferencesRepository: UserPrefe
         return evDatabase
     }
 
+    fun getReplicator(): Replicator? {
+        return replicator
+    }
+
 
     private fun initEvDataDatabase(context: Context, username: String) {
         currentUser = username
@@ -88,8 +92,10 @@ class DatabaseManager(val context: Context, userPreferencesRepository: UserPrefe
                     database = evDatabase,
                     target = URLEndpoint(url!!),
                     type = ReplicatorType.PUSH_AND_PULL,
-                    true,
-                    authenticator = SessionAuthenticator(session)
+                    continuous = true,
+                    authenticator = SessionAuthenticator(session),
+                    enableAutoPurge = true,
+                    heartbeat = 5
                     )
                 )
 
