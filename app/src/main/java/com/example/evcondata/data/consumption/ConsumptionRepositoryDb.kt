@@ -52,7 +52,29 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
             .map { qc -> mapQueryChangeToConsumptionList(qc) }
             .flowOn(Dispatchers.IO)
 
-        query.execute()
+        return flow
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun getPublicConsumptionListFlow(): Flow<List<ConsumptionModelDTO>> {
+        val db = databaseManager.getConsumptionDatabase()
+        val query = db?.let { DataSource.database(it) }?.let {
+            QueryBuilder.select(
+                SelectResult.expression(Meta.id),
+                SelectResult.all())
+                .from(it.`as`("item"))
+                .where(Expression.property("type").equalTo(Expression.string("consumption"))
+                    .and(Expression.property("public").equalTo(Expression.booleanValue(true))))
+        }
+
+        val flow = query!!
+            .queryChangeFlow()
+            .map { qc -> mapQueryChangeToConsumptionList(qc) }
+            .flowOn(Dispatchers.IO)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            purgeWorkaround()
+        }
         return flow
     }
 

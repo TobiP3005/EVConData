@@ -79,4 +79,9 @@
             android:id="@+id/action_login_to_myCar"
             app:destination="@id/nav_my_car" />
     </fragment>
+    <fragment
+        android:id="@+id/publicConsumptionFragment"
+        android:name="com.example.evcondata.ui.consumption.PublicConsumptionFragment"
+        android:label="Community Consumption"
+        tools:layout="@layout/fragment_public_consumption_list" />
 </navigation>

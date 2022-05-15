@@ -6,10 +6,7 @@ import com.example.evcondata.model.Consumption
 import com.example.evcondata.model.ConsumptionModelDTO
 import com.example.evcondata.model.ResultCode
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -18,6 +15,9 @@ class ConsumptionViewModel @Inject constructor (private val consumptionRepositor
 
     val consumptionList: Flow<List<ConsumptionModelDTO>>?
         get() = consumptionRepository.getConsumptionListFlow()
+
+    val publicConsumptionList: Flow<List<ConsumptionModelDTO>>
+        get() = consumptionRepository.getPublicConsumptionListFlow()
 
     val getConsumption: (String) -> Flow<Consumption?> = { id: String ->
         consumptionRepository.getConsumption(id)

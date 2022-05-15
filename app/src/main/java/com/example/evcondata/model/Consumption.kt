@@ -18,5 +18,8 @@ data class Consumption (
     var temperature: Int?,
     var altitudeUp: Int?,
     var altitudeDown: Int?,
+    var username: String? = null,
+    var owner: String? = null,
+    var public: Boolean? = false,
     var type: String = "consumption"
 ) : Parcelable
