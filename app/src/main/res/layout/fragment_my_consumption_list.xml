@@ -41,7 +41,7 @@
             android:clickable="true"
             android:layout_margin="@dimen/fab_margin"
             app:srcCompat="@drawable/ic_add"
-            android:contentDescription="Button to add a new consumption entry" />
+            android:contentDescription="@string/button_to_add_a_new_consumption_entry" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
