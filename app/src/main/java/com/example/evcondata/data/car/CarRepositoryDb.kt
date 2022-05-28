@@ -1,17 +1,42 @@
 package com.example.evcondata.data.car
 
+import android.util.Log
 import com.couchbase.lite.*
 import com.example.evcondata.data.DatabaseManager
+import com.example.evcondata.data.auth.UserPreferencesRepository
 import com.example.evcondata.model.Car
 import com.example.evcondata.model.CarModelDTO
+import com.example.evcondata.model.UserProfile
 import com.google.gson.Gson
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
-class CarRepositoryDb(private val databaseManager: DatabaseManager) : CarRepository {
+class CarRepositoryDb(private val databaseManager: DatabaseManager, userPreferencesRepository: UserPreferencesRepository) : CarRepository {
+
+    private val userPref = userPreferencesRepository
+
+    init {
+        var myCar: String? = null
+        try{
+            val userID = userPref.userId
+            val db = databaseManager.getConsumptionDatabase()
+            val doc = db?.getDocument("settings:$userID")
+            if (doc != null){
+                myCar = doc.getString("myCar").toString()
+            }
+        } catch (e: Exception){
+            Log.e(e.message, e.stackTraceToString())
+        }
+
+        CoroutineScope(Dispatchers.IO).launch {
+            myCar?.let { userPref.setMyCar(it) }
+        }
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getCarListFlow(): Flow<List<Car>> {
@@ -31,6 +56,66 @@ class CarRepositoryDb(private val databaseManager: DatabaseManager) : CarReposit
         return flow
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun getMyCar(carName: String): Car? {
+        val db = databaseManager.getEvDataDatabase()
+        val query = db?.let { DataSource.database(it) }?.let {
+            QueryBuilder.select(
+                SelectResult.expression(Meta.id),
+                SelectResult.all())
+                .from(it.`as`("item"))
+                .where(Expression.property("name").equalTo(Expression.string(carName))
+                .and(Expression.property("type").equalTo(Expression.string("car"))))
+        }
+        val car = query!!.execute()
+            .map { qc -> mapQueryChangeToCar(qc) }
+
+        if (car.isEmpty()){
+            return null
+        }
+        return car.first()
+    }
+
+    override fun getMyCarFlow(): Flow<String> {
+        return userPref.myCarFlow
+    }
+
+    override fun setMyCar(myCar: String) {
+        val userID = userPref.userId
+        val db = databaseManager.getConsumptionDatabase()
+        val docOrigin = db?.getDocument("settings:$userID")
+        if (docOrigin != null) {
+            val userProfile = Gson().fromJson(docOrigin.toJSON(), UserProfile::class.java)
+            userProfile.myCar = myCar
+            val json = Gson().toJson(userProfile)
+            val doc = MutableDocument(docOrigin.id, json)
+            db.save(doc)
+        }
+
+        CoroutineScope(Dispatchers.IO).launch {
+            myCar.let { userPref.setMyCar(it) }
+        }
+    }
+
+    override fun getCarNames(): List<String> {
+        val db = databaseManager.getConsumptionDatabase()
+        val query = db?.let { DataSource.database(it) }?.let {
+            QueryBuilder.selectDistinct(
+                SelectResult.expression(Expression.property("name"))
+            )
+                .from(it)
+                .where(Expression.property("type").equalTo(Expression.string("car"))
+                )
+        }
+
+        val rs = query!!.execute()
+        val carNamesList = mutableListOf<String>()
+        for (result in rs) {
+            result.getString("name")?.let { carNamesList.add(it) }
+        }
+        return carNamesList
+    }
+
     private fun mapQueryChangeToCarList(queryChange: QueryChange) : List<Car>{
         val carList = mutableListOf<Car>()
         queryChange.results?.let { results ->
@@ -39,5 +124,13 @@ class CarRepositoryDb(private val databaseManager: DatabaseManager) : CarReposit
             }
         }
         return carList
+    }
+
+    private fun mapQueryChangeToCar(queryChange: Result) : Car?{
+        var car: Car?
+        queryChange.let { result ->
+                car = Gson().fromJson(result.toJSON(), CarModelDTO::class.java).item
+        }
+        return car
     }
 }

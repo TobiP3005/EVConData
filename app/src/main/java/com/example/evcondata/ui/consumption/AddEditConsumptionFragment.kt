@@ -96,7 +96,8 @@ class AddEditConsumptionFragment : Fragment() {
                 binding.EditTextConsumption.text.toString().toFloatOrNull(),
                 binding.EditTextTemperature.text.toString().toIntOrNull(),
                 binding.EditTextAltitudeUp.text.toString().toIntOrNull(),
-                binding.EditTextAltitudeDown.text.toString().toIntOrNull()
+                binding.EditTextAltitudeDown.text.toString().toIntOrNull(),
+                consumptionViewModel.myCar
             )
 
             val id: String = if (editConsumptionEntry != null)

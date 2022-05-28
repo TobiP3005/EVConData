@@ -15,6 +15,7 @@ data class Car(
     var wltpRange: Int?,
     var chargeSpeed: Int?,
     var maxSpeed: Int?,
+    var acceleration: Float?,
     var imageUri: String?,
     var type: String = "car"
 ) : Parcelable

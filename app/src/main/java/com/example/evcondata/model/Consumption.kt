@@ -18,6 +18,7 @@ data class Consumption (
     var temperature: Int?,
     var altitudeUp: Int?,
     var altitudeDown: Int?,
+    var car: String?,
     var username: String? = null,
     var owner: String? = null,
     var public: Boolean? = false,
