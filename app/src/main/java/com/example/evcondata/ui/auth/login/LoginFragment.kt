@@ -161,10 +161,8 @@ class LoginFragment : Fragment() {
             val idToken = account.idToken
 
             loginViewModel.login(firstName, lastName, idToken)
-            //updateUI(account)
         } catch (e: ApiException) {
             Log.w(TAG, "handleSignInResult:error", e)
-            //updateUI(null)
         }
     }
 
