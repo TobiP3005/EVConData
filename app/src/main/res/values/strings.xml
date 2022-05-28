@@ -63,4 +63,8 @@
     <string name="menu_login">LOGIN</string>
     <string name="publish_data">Publish Data</string>
     <string name="button_to_add_a_new_consumption_entry">Button to add a new consumption entry</string>
+    <string name="wltp">WLTP</string>
+    <string name="acceleration">Acceleration</string>
+    <string name="me">Me</string>
+    <string name="community">Community</string>
 </resources>
