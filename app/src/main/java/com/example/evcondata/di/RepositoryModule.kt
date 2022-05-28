@@ -24,22 +24,22 @@ object RepositoryModule {
         databaseManager: DatabaseManager,
         userPreferencesDataStore: UserPreferencesRepository
     ): ConsumptionRepository {
-        val repository = ConsumptionRepositoryDb(
+        return ConsumptionRepositoryDb(
             databaseManager = databaseManager,
-            userPreferencesDataStore
+            userPreferencesRepository = userPreferencesDataStore
         )
-        return repository
     }
 
     @Singleton
     @Provides
     fun provideCarRepository(
-        databaseManager: DatabaseManager
+        databaseManager: DatabaseManager,
+        userPreferencesDataStore: UserPreferencesRepository
     ): CarRepository {
-        val repository = CarRepositoryDb(
-            databaseManager = databaseManager
+        return CarRepositoryDb(
+            databaseManager = databaseManager,
+            userPreferencesRepository = userPreferencesDataStore
         )
-        return repository
     }
 
     @Singleton

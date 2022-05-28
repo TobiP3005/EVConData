@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
@@ -13,9 +14,9 @@ import javax.inject.Inject
 class UserPreferencesRepository @Inject constructor(
     private val dataStore: DataStore<Preferences>
 ){
-
     private val sessionPrefKey = stringPreferencesKey("sessionToken")
     private val usernamePrefKey = stringPreferencesKey("username")
+    private val myCarPrefKey = stringPreferencesKey("myCar")
     private val userIdPrefKey = stringPreferencesKey("userId")
     private val sharedConBoolPrefKey = stringPreferencesKey("sharedConsumptionBool")
 
@@ -28,6 +29,12 @@ class UserPreferencesRepository @Inject constructor(
     suspend fun setUsername(username: String) {
         dataStore.edit { settings ->
             settings[usernamePrefKey] = username
+        }
+    }
+
+    suspend fun setMyCar(username: String) {
+        dataStore.edit { settings ->
+            settings[myCarPrefKey] = username
         }
     }
 
@@ -76,6 +83,18 @@ class UserPreferencesRepository @Inject constructor(
                 preferences[usernamePrefKey]
             }.first()
     }
+
+    val myCar=
+        runBlocking {
+            dataStore.data.map { preferences ->
+                preferences[myCarPrefKey]
+            }.first()
+        }
+
+    val myCarFlow: Flow<String> =
+        dataStore.data.map { preferences ->
+            preferences[myCarPrefKey] ?: ""
+        }.distinctUntilChanged()
 
     val sharedConsumption =
         runBlocking {
