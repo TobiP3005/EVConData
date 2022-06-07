@@ -58,45 +58,42 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
             }
     }.flowOn(Dispatchers.IO)
 
-
     override fun publishData(publishDataBool: Boolean){
 
-        val sharedBool = userPref.sharedConsumption
+        CoroutineScope(Dispatchers.IO).launch {
+            userPref.setSharedConBool(publishDataBool.toString())
+        }
 
-        if (publishDataBool != sharedBool){
-            CoroutineScope(Dispatchers.IO).launch {
-                userPref.setSharedConBool(publishDataBool.toString())
-            }
+        val db = databaseManager.getConsumptionDatabase()
+        val docOrigin = db?.getDocument("userprofile:"+userPref.userId)
+        if (docOrigin != null) {
+            val userProfile = Gson().fromJson(docOrigin.toJSON(), Consumption::class.java)
+            userProfile.published = publishDataBool
 
-            val db = databaseManager.getConsumptionDatabase()
+            val json = Gson().toJson(userProfile)
+            val doc = MutableDocument(docOrigin.id, json)
+            db.save(doc)
+        }
 
-            val json = Gson().toJson(Setting(publishDataBool))
-
-            val docOrgigin = db?.getDocument("settings:"+userPref.userId)
-
-            val doc = MutableDocument(docOrgigin?.id, json)
-            db?.save(doc)
-
-            val query = db?.let { DataSource.database(it) }?.let {
-                QueryBuilder.select(
-                    SelectResult.expression(Meta.id))
-                    .from(it.`as`("item"))
-                    .where(Expression.property("type").equalTo(Expression.string("consumption"))
-                        .and(Expression.property("owner").equalTo(Expression.string(userPref.userId))))
-            }
-            try {
-                val rs = query!!.execute()
-                for (result in rs) {
-                    val id: String? = result.getString("id")
-                    if (id != null){
-                        val doc: MutableDocument = db.getDocument(id)!!.toMutable()
-                        doc.setBoolean("public", publishDataBool)
-                        db.save(doc)
-                    }
+        val query = db?.let { DataSource.database(it) }?.let {
+            QueryBuilder.select(
+                SelectResult.expression(Meta.id))
+                .from(it.`as`("item"))
+                .where(Expression.property("type").equalTo(Expression.string("consumption"))
+                    .and(Expression.property("owner").equalTo(Expression.string(userPref.userId))))
+        }
+        try {
+            val rs = query!!.execute()
+            for (result in rs) {
+                val id: String? = result.getString("id")
+                if (id != null){
+                    val doc: MutableDocument = db.getDocument(id)!!.toMutable()
+                    doc.setBoolean("published", publishDataBool)
+                    db.save(doc)
                 }
-            } catch (e: CouchbaseLiteException) {
-                throw e
             }
+        } catch (e: CouchbaseLiteException) {
+            throw e
         }
     }
 
@@ -115,8 +112,6 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
             .queryChangeFlow()
             .map { qc -> mapQueryChangeToConsumptionList(qc) }
             .flowOn(Dispatchers.IO)
-
-        return flow
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
