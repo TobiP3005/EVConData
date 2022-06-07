@@ -9,7 +9,7 @@ interface ConsumptionRepository {
 
     fun initializeDatabase()
 
-    fun getConsumptionListFlow(): Flow<List<ConsumptionModelDTO>>?
+    fun getMyConsumptionListFlow(myCar: String): Flow<List<ConsumptionModelDTO>>
 
     fun getPublicConsumptionListFlow(myCar: String): Flow<List<ConsumptionModelDTO>>
 

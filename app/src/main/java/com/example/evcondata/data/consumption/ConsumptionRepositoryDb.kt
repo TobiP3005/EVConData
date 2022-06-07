@@ -99,7 +99,7 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getConsumptionListFlow(): Flow<List<ConsumptionModelDTO>> {
+    override fun getMyConsumptionListFlow(myCar: String): Flow<List<ConsumptionModelDTO>> {
         val db = databaseManager.getConsumptionDatabase()
         val query = db?.let { DataSource.database(it) }?.let {
             QueryBuilder.select(
@@ -107,7 +107,8 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
                 SelectResult.all())
                 .from(it.`as`("item"))
                 .where(Expression.property("type").equalTo(Expression.string("consumption"))
-                    .and(Expression.property("owner").equalTo(Expression.string(userPref.userId))))
+                    .and(Expression.property("owner").equalTo(Expression.string(userPref.userId)))
+                    .and(Expression.property("car").equalTo(Expression.string(myCar))))
         }
 
         return query!!

@@ -126,10 +126,13 @@ class MyConsumptionListFragment : Fragment() {
     private fun keepConsumptionListUpdated() {
 
         lifecycle.coroutineScope.launch {
-            consumptionViewModel.consumptionList
-                ?.collect { list ->
-                    consumptionListAdapter.setConsumptionList(list)
-                    consumptionListAdapter.notifyDataSetChanged()
+            consumptionViewModel.myCarFlow
+                .collect { carName ->
+                    consumptionViewModel.myConsumptionList(carName)
+                        .collect { list ->
+                            consumptionListAdapter.setConsumptionList(list)
+                            consumptionListAdapter.notifyDataSetChanged()
+                        }
                 }
         }
     }
