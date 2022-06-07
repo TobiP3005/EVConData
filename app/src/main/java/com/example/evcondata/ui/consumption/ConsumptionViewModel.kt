@@ -16,8 +16,9 @@ class ConsumptionViewModel @Inject constructor (private val consumptionRepositor
     val consumptionList: Flow<List<ConsumptionModelDTO>>?
         get() = consumptionRepository.getConsumptionListFlow()
 
-    val publicConsumptionList: Flow<List<ConsumptionModelDTO>>
-        get() = consumptionRepository.getPublicConsumptionListFlow()
+    val publicConsumptionList: (myCar: String) -> Flow<List<ConsumptionModelDTO>> = { myCar: String ->
+        consumptionRepository.getPublicConsumptionListFlow(myCar)
+    }
 
     val getConsumption: (String) -> Flow<Consumption?> = { id: String ->
         consumptionRepository.getConsumption(id)

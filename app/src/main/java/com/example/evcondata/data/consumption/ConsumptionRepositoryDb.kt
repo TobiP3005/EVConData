@@ -120,7 +120,7 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getPublicConsumptionListFlow(): Flow<List<ConsumptionModelDTO>> {
+    override fun getPublicConsumptionListFlow(myCar: String): Flow<List<ConsumptionModelDTO>> {
         val db = databaseManager.getConsumptionDatabase()
         val query = db?.let { DataSource.database(it) }?.let {
             QueryBuilder.select(
@@ -128,7 +128,8 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
                 SelectResult.all())
                 .from(it.`as`("item"))
                 .where(Expression.property("type").equalTo(Expression.string("consumption"))
-                    .and(Expression.property("public").equalTo(Expression.booleanValue(true))))
+                    .and(Expression.property("published").equalTo(Expression.booleanValue(true)))
+                    .and(Expression.property("car").equalTo(Expression.string(myCar))))
         }
 
         val flow = query!!
