@@ -11,11 +11,10 @@ class DatabaseManager(val context: Context, userPreferencesRepository: UserPrefe
 
     val userPref = userPreferencesRepository
 
-    val syncGatewayEndpoint = "ws://adac-icphig-cbtest.germanywestcentral.cloudapp.azure.com:4984"
+    private val syncGatewayEndpoint = "ws://adac-icphig-cbtest.germanywestcentral.cloudapp.azure.com:4984"
 
-    var databases: MutableMap<String, DatabaseResource> = mutableMapOf()
     var evDataDbName = "ev-data"
-    private var evDatabase: Database? = null
+    private var evDataDatabase: Database? = null
 
     private var currentUser: String? = null
 
@@ -31,42 +30,38 @@ class DatabaseManager(val context: Context, userPreferencesRepository: UserPrefe
         startPullReplication()
     }
 
-    fun deleteDatabase() {
+    fun deleteEvDataDatabase() {
         try {
-            databases.forEach {
-                if (Database.exists(it.key, context.filesDir)){
-                    it.value.database.close()
-                    Database.delete(it.key, context.filesDir)
-                }
+            if (Database.exists(evDataDbName, context.filesDir)){
+                evDataDatabase?.close()
+                Database.delete(evDataDbName, context.filesDir)
             }
-            databases.clear()
         } catch (e: Exception){
             Log.e(e.message, e.stackTraceToString())
         }
     }
 
     fun getConsumptionDatabase(): Database? {
-        return evDatabase
+        return evDataDatabase
     }
 
     fun getReplicator(): Replicator? {
         return replicator
     }
 
-
-    private fun initEvDataDatabase(context: Context, username: String) {
-        currentUser = username
+    private fun initEvDataDatabase(context: Context, userId: String) {
+        currentUser = userId
         val config = DatabaseConfiguration()
-        config.directory = String.format("%s/%s", context.filesDir, username)
+        config.directory = String.format("%s/%s", context.filesDir, userId)
         try {
-            evDatabase = Database(evDataDbName, config)
+            evDataDatabase = Database(evDataDbName, config)
         } catch (e: CouchbaseLiteException) {
             e.printStackTrace()
         }
     }
 
     fun getEvDataDatabase(): Database? {
-        return evDatabase
+        return evDataDatabase
     }
 
     // tag::startPushAndPullReplicationForCurrentUser[]
@@ -85,19 +80,18 @@ class DatabaseManager(val context: Context, userPreferencesRepository: UserPrefe
             e.printStackTrace()
         }
 
-        val session = userPref.sessionToken
-        replicator =
-            Replicator(
-                ReplicatorConfigurationFactory.create(
-                    database = evDatabase,
-                    target = URLEndpoint(url!!),
-                    type = ReplicatorType.PUSH_AND_PULL,
-                    continuous = true,
-                    authenticator = SessionAuthenticator(session),
-                    enableAutoPurge = true,
-                    heartbeat = 5
-                    )
-                )
+        val sessionToken = userPref.sessionToken
+        Replicator(
+            ReplicatorConfigurationFactory.create(
+                database = evDataDatabase,
+                target = URLEndpoint(url!!),
+                type = ReplicatorType.PUSH_AND_PULL,
+                continuous = true,
+                authenticator = SessionAuthenticator(sessionToken),
+                enableAutoPurge = true,
+                heartbeat = 5
+            )
+        ).also { replicator = it }
 
         replicatorListenerToken = replicator!!.addChangeListener { change ->
             if (change.replicator.status.activityLevel == ReplicatorActivityLevel.IDLE) {
