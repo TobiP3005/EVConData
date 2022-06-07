@@ -22,6 +22,7 @@ class MyCarFragment : Fragment() {
 
     private val myCarViewModel: MyCarViewModel by viewModels()
     private lateinit var binding: FragmentMyCarBinding
+    private var myCar: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -32,9 +33,8 @@ class MyCarFragment : Fragment() {
 
         binding = FragmentMyCarBinding.inflate(inflater, container, false)
 
-        val carNameList = myCarViewModel.carNames
         val adapter = ArrayAdapter(requireContext(),
-            android.R.layout.simple_spinner_dropdown_item, carNameList
+            android.R.layout.simple_spinner_dropdown_item, mutableListOf<String>()
         )
         adapter.insert("", 0)
         binding.spinnerCars.adapter = adapter
@@ -51,8 +51,24 @@ class MyCarFragment : Fragment() {
         }
 
         lifecycle.coroutineScope.launch {
+            myCarViewModel.carNames.collect { carNameList ->
+                adapter.clear()
+                if (myCar.isNullOrBlank()) {
+                    adapter.insert("", 0)
+                }
+                adapter.addAll(carNameList)
+                adapter.notifyDataSetChanged()
+                if (myCar != null) {
+                    val spinnerPosition = adapter.getPosition(myCar)
+                    binding.spinnerCars.setSelection(spinnerPosition)
+                }
+            }
+        }
+
+        lifecycle.coroutineScope.launch {
             myCarViewModel.myCarFlow
                 .collect { carName ->
+                    myCar = carName
                     val spinnerPosition = adapter.getPosition(carName)
                     binding.spinnerCars.setSelection(spinnerPosition)
                     loadData(carName)

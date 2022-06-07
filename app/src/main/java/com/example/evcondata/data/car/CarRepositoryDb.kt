@@ -56,7 +56,6 @@ class CarRepositoryDb(private val databaseManager: DatabaseManager, userPreferen
         return flow
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getMyCar(carName: String): Car? {
         val db = databaseManager.getEvDataDatabase()
         val query = db?.let { DataSource.database(it) }?.let {
@@ -66,6 +65,7 @@ class CarRepositoryDb(private val databaseManager: DatabaseManager, userPreferen
                 .from(it.`as`("item"))
                 .where(Expression.property("name").equalTo(Expression.string(carName))
                 .and(Expression.property("type").equalTo(Expression.string("car"))))
+                .limit(1)
         }
         val car = query!!.execute()
             .map { qc -> mapQueryChangeToCar(qc) }
@@ -83,7 +83,7 @@ class CarRepositoryDb(private val databaseManager: DatabaseManager, userPreferen
     override fun setMyCar(myCar: String) {
         val userID = userPref.userId
         val db = databaseManager.getConsumptionDatabase()
-        val docOrigin = db?.getDocument("settings:$userID")
+        val docOrigin = db?.getDocument("userprofile:$userID")
         if (docOrigin != null) {
             val userProfile = Gson().fromJson(docOrigin.toJSON(), UserProfile::class.java)
             userProfile.myCar = myCar
@@ -91,13 +91,20 @@ class CarRepositoryDb(private val databaseManager: DatabaseManager, userPreferen
             val doc = MutableDocument(docOrigin.id, json)
             db.save(doc)
         }
+        else {
+            val userProfile = UserProfile(false, myCar, userID)
+            val json = Gson().toJson(userProfile)
+            val doc = MutableDocument("userprofile:$userID", json)
+            db?.save(doc)
+        }
 
         CoroutineScope(Dispatchers.IO).launch {
             myCar.let { userPref.setMyCar(it) }
         }
     }
 
-    override fun getCarNames(): List<String> {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun getCarNames(): Flow<List<String>> {
         val db = databaseManager.getConsumptionDatabase()
         val query = db?.let { DataSource.database(it) }?.let {
             QueryBuilder.selectDistinct(
@@ -107,13 +114,27 @@ class CarRepositoryDb(private val databaseManager: DatabaseManager, userPreferen
                 .where(Expression.property("type").equalTo(Expression.string("car"))
                 )
         }
+        val flow = query!!
+            .queryChangeFlow()
+            .map { qc -> getCarNames(qc) }
+            .flowOn(Dispatchers.IO)
 
         val rs = query!!.execute()
         val carNamesList = mutableListOf<String>()
         for (result in rs) {
             result.getString("name")?.let { carNamesList.add(it) }
         }
-        return carNamesList
+        return flow
+    }
+
+    private fun getCarNames(queryChange: QueryChange) : List<String> {
+        val carList = mutableListOf<String>()
+        queryChange.results?.let { results ->
+            results.forEach { result ->
+                result.getString("name")?.let { carList.add(it) }
+            }
+        }
+        return carList
     }
 
     private fun mapQueryChangeToCarList(queryChange: QueryChange) : List<Car>{

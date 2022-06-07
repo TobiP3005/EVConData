@@ -12,5 +12,5 @@ interface CarRepository {
 
     fun setMyCar(myCar: String)
 
-    fun getCarNames(): List<String>
+    fun getCarNames(): Flow<List<String>>
 }

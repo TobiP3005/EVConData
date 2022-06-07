@@ -30,7 +30,7 @@ class MyCarViewModel @Inject constructor (
         carRepository.setMyCar(carName)
     }
 
-    val carNames: List<String>
+    val carNames: Flow<List<String>>
         get() = carRepository.getCarNames()
 
     val getAvgConsumption: (String) -> Flow<Float?> = { carName: String ->
