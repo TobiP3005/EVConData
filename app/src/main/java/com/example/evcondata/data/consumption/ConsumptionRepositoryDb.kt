@@ -139,10 +139,24 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private suspend fun purgeWorkaround() {
-        val repl = databaseManager.getReplicator()
-        val replicatedDocs = repl!!.documentReplicationFlow()
-            .map { update -> update.documents }
+    override fun getCommunityAvgConsumption(carName: String): Flow<Float?> {
+        val db = databaseManager.getConsumptionDatabase()
+        val query = db?.let { DataSource.database(it) }?.let {
+            QueryBuilder.select(
+                SelectResult.expression(Function.count(Expression.property("consumption"))).`as`("count"),
+                SelectResult.expression(Function.avg(Expression.property("consumption"))).`as`("avg")
+
+            )
+                .from(it)
+                .where(Expression.property("car").equalTo(Expression.string(carName))
+                    .and(Expression.property("type").equalTo(Expression.string("consumption")))
+                    .and(Expression.property("published").equalTo(Expression.booleanValue(true)))
+                )
+        }
+
+        return query!!
+            .queryChangeFlow()
+            .map { qc -> mapQueryChangeToConsumptionFloat(qc) }
             .flowOn(Dispatchers.IO)
 
         replicatedDocs
@@ -163,6 +177,16 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
             }
         }
         return consumptionList
+    }
+
+    private fun mapQueryChangeToConsumptionFloat(queryChange: QueryChange) : Float?{
+        var avg: Float? = null
+        queryChange.results?.let { results ->
+            val t = results.first()
+            if (t.getInt("count") > 0)
+                avg = t.getFloat("avg")
+        }
+        return avg
     }
 
     override fun saveConsumption(consumption: Consumption, id: String): Flow<ResultCode> = flow {
