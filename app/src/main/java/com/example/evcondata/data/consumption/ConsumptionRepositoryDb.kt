@@ -2,13 +2,14 @@ package com.example.evcondata.data.consumption
 
 import android.util.Log
 import com.couchbase.lite.*
+import com.couchbase.lite.Function
 import com.example.evcondata.data.DatabaseManager
 import com.example.evcondata.data.auth.UserPreferencesRepository
 import com.example.evcondata.model.Consumption
 import com.example.evcondata.model.ConsumptionModelDTO
 import com.example.evcondata.model.ResultCode
-import com.example.evcondata.model.Setting
 import com.google.gson.Gson
+import com.molo17.couchbase.lite.documentReplicationFlow
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
@@ -108,7 +109,8 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
                 .where(Expression.property("type").equalTo(Expression.string("consumption"))
                     .and(Expression.property("owner").equalTo(Expression.string(userPref.userId))))
         }
-        val flow = query!!
+
+        return query!!
             .queryChangeFlow()
             .map { qc -> mapQueryChangeToConsumptionList(qc) }
             .flowOn(Dispatchers.IO)
@@ -222,7 +224,7 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
         try{
             consumption.username = userPref.username
             consumption.owner = userPref.userId
-            consumption.public = userPref.sharedConsumption
+            consumption.published = userPref.sharedConsumption
             val db = databaseManager.getConsumptionDatabase()
             db?.let { database ->
                 val json = Gson().toJson(consumption)
@@ -259,7 +261,7 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
 
     override suspend fun deleteDatabase() {
         return withContext(Dispatchers.IO){
-            return@withContext databaseManager.deleteDatabase()
+            return@withContext databaseManager.deleteEvDataDatabase()
         }
     }
 }

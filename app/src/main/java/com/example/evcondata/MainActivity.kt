@@ -12,7 +12,6 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.example.evcondata.data.auth.LoginDataSource
 import com.example.evcondata.data.auth.LoginRepository
 import com.example.evcondata.data.auth.UserPreferencesRepository
 import com.example.evcondata.databinding.ActivityMainBinding

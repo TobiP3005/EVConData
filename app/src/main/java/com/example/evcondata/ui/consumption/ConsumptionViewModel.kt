@@ -1,6 +1,7 @@
 package com.example.evcondata.ui.consumption
 
 import androidx.lifecycle.*
+import com.example.evcondata.data.auth.UserPreferencesRepository
 import com.example.evcondata.data.consumption.ConsumptionRepository
 import com.example.evcondata.model.Consumption
 import com.example.evcondata.model.ConsumptionModelDTO
@@ -10,8 +11,13 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 @HiltViewModel
-class ConsumptionViewModel @Inject constructor (private val consumptionRepository: ConsumptionRepository)
+class ConsumptionViewModel @Inject constructor (
+    private val consumptionRepository: ConsumptionRepository,
+    userPreferencesRepository: UserPreferencesRepository
+    )
     : ViewModel() {
+
+    val userPref = userPreferencesRepository
 
     val consumptionList: Flow<List<ConsumptionModelDTO>>?
         get() = consumptionRepository.getConsumptionListFlow()
@@ -38,5 +44,11 @@ class ConsumptionViewModel @Inject constructor (private val consumptionRepositor
 
     val sharedConFlow: Flow<String>
         get() = consumptionRepository.sharedConFlow()
+
+    val myCar: String?
+        get() = userPref.myCar
+
+    val myCarFlow: Flow<String>
+        get() = userPref.myCarFlow
 
 }

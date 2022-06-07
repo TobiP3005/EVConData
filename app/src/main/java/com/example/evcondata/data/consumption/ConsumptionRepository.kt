@@ -11,7 +11,7 @@ interface ConsumptionRepository {
 
     fun getConsumptionListFlow(): Flow<List<ConsumptionModelDTO>>?
 
-    fun getPublicConsumptionListFlow(): Flow<List<ConsumptionModelDTO>>
+    fun getPublicConsumptionListFlow(myCar: String): Flow<List<ConsumptionModelDTO>>
 
     fun getConsumption(id: String): Flow<Consumption?>
 
