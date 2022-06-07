@@ -15,6 +15,10 @@ interface ConsumptionRepository {
 
     fun getConsumption(id: String): Flow<Consumption?>
 
+    fun getCommunityAvgConsumption(carName: String): Flow<Float?>
+
+    fun getMyAvgConsumption(carName: String): Flow<Float?>
+
     fun saveConsumption(consumption: Consumption, id: String): Flow<ResultCode>
 
     fun publishData(publishDataBool: Boolean)
