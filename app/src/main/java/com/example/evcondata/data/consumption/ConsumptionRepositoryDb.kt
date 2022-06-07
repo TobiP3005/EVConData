@@ -26,14 +26,9 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
         try{
             val userID = userPref.userId
             val db = databaseManager.getConsumptionDatabase()
-            val doc = db?.getDocument("settings:$userID")
+            val doc = db?.getDocument("userprofile:$userID")
             if (doc != null){
                 shared = doc.getBoolean("publicConsumption").toString()
-            }else {
-                val json = Gson().toJson(Setting(false))
-                val settingsDoc = MutableDocument("settings:$userID", json)
-
-                db?.save(settingsDoc)
             }
         } catch (e: Exception){
             Log.e(e.message, e.stackTraceToString())
