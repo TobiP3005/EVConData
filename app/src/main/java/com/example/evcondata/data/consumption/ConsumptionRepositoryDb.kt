@@ -159,14 +159,20 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
             .map { qc -> mapQueryChangeToConsumptionFloat(qc) }
             .flowOn(Dispatchers.IO)
 
-        replicatedDocs
-            .collect { list ->
-                val purgeBool = list.any { it.flags.contains(DocumentFlag.ACCESS_REMOVED) }
-                if (purgeBool){
-                    saveConsumption(Consumption(null, null, null, null, null,null,null,null,null, true), "purgeWorkaround").collect()
-                    deleteConsumption("purgeWorkaround").collect()
-                }
+    private suspend fun purgeWorkaround() {
+        val replicator = databaseManager.getReplicator()
+        val replicatorFlow = replicator?.documentReplicationFlow()
+            ?.map { update -> update.documents }
+            ?.flowOn(Dispatchers.IO)
+
+        replicatorFlow?.collect { list ->
+            val purgeBool = list.any { it.flags.contains(DocumentFlag.ACCESS_REMOVED) }
+            if (purgeBool){
+                saveConsumption(Consumption("", "", 0, 0f, 0, 0, 0, ""),
+                    "purgeWorkaround").collect()
+                deleteConsumption("purgeWorkaround").collect()
             }
+        }
     }
 
     private fun mapQueryChangeToConsumptionList(queryChange: QueryChange) : List<ConsumptionModelDTO>{
