@@ -1,7 +1,8 @@
 package com.example.evcondata.model
 
 data class UserProfile(
-    var publicConsumption: Boolean,
+    var publishConsumption: Boolean,
     var myCar: String,
-    val type: String = "user_profile"
+    var owner: String,
+    val type: String = "userprofile"
 )

@@ -21,6 +21,6 @@ data class Consumption (
     var car: String?,
     var username: String? = null,
     var owner: String? = null,
-    var public: Boolean? = false,
+    var published: Boolean? = false,
     var type: String = "consumption"
 ) : Parcelable

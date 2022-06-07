@@ -8,24 +8,41 @@ import com.example.evcondata.model.Car
 import com.example.evcondata.model.CarModelDTO
 import com.example.evcondata.model.UserProfile
 import com.google.gson.Gson
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import com.molo17.couchbase.lite.limit
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 
 class CarRepositoryDb(private val databaseManager: DatabaseManager, userPreferencesRepository: UserPreferencesRepository) : CarRepository {
 
     private val userPref = userPreferencesRepository
 
     init {
+        waitForReplicator()
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun waitForReplicator() {
+        val replicator = databaseManager.getReplicator()
+        val replicatorFlow = replicator?.replicatorChangesFlow()
+            ?.map { update -> update.status }
+            ?.flowOn(Dispatchers.IO)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            replicatorFlow?.cancellable()?.collect { status ->
+                if (status.activityLevel == ReplicatorActivityLevel.IDLE) {
+                    configureUserProfile()
+                    this.cancel()
+                }
+            }
+        }
+    }
+
+    fun configureUserProfile() {
         var myCar: String? = null
         try{
             val userID = userPref.userId
             val db = databaseManager.getConsumptionDatabase()
-            val doc = db?.getDocument("settings:$userID")
+            val doc = db?.getDocument("userprofile:$userID")
             if (doc != null){
                 myCar = doc.getString("myCar").toString()
             }
@@ -119,7 +136,7 @@ class CarRepositoryDb(private val databaseManager: DatabaseManager, userPreferen
             .map { qc -> getCarNames(qc) }
             .flowOn(Dispatchers.IO)
 
-        val rs = query!!.execute()
+        val rs = query.execute()
         val carNamesList = mutableListOf<String>()
         for (result in rs) {
             result.getString("name")?.let { carNamesList.add(it) }
