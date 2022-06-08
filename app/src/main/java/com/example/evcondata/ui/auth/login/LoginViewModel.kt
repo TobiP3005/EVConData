@@ -60,6 +60,13 @@ class LoginViewModel @Inject constructor(private val loginRepository: LoginRepos
         }
     }
 
+    fun logout() {
+        CoroutineScope(Dispatchers.IO).launch {
+            userPreferencesRepository.logoutUser()
+            loginRepository.logout()
+        }
+    }
+
     fun loginDataChanged(username: String, password: String) {
         if (!isUserNameValid(username)) {
             _loginForm.value = LoginFormState(usernameError = R.string.invalid_username)

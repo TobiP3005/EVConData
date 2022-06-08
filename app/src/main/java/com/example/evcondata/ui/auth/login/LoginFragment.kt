@@ -62,6 +62,8 @@ class LoginFragment : Fragment() {
             view.findNavController().navigate(LoginFragmentDirections.actionLoginToMyCar())
         }
 
+        googleSignInClient.signOut()
+
         return binding.root
     }
 
@@ -138,7 +140,6 @@ class LoginFragment : Fragment() {
 
         val resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
-                // There are no request codes
                 val data: Intent? = result.data
                 val task: Task<GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(data)
 
@@ -149,7 +150,6 @@ class LoginFragment : Fragment() {
         sign_in_button.setOnClickListener {
             val signInIntent = this.googleSignInClient.signInIntent
             resultLauncher.launch(signInIntent)
-            //signInWithGoogle()
         }
     }
 
@@ -188,18 +188,14 @@ class LoginFragment : Fragment() {
         Toast.makeText(appContext, errorString, Toast.LENGTH_LONG).show()
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-    }
-
     /**
      * Force hide softKeyboard.
      */
-    fun Fragment.hideKeyboard() {
+    private fun Fragment.hideKeyboard() {
         view?.let { activity?.hideKeyboard(it) }
     }
 
-    fun Context.hideKeyboard(view: View) {
+    private fun Context.hideKeyboard(view: View) {
         val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }

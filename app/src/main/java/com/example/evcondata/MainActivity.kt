@@ -7,14 +7,15 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.example.evcondata.data.auth.LoginRepository
 import com.example.evcondata.data.auth.UserPreferencesRepository
 import com.example.evcondata.databinding.ActivityMainBinding
+import com.example.evcondata.ui.auth.login.LoginViewModel
 import com.google.android.material.navigation.NavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -25,10 +26,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     @Inject lateinit var userPreferencesRepository: UserPreferencesRepository
-    @Inject lateinit var loginRepository: LoginRepository
+    lateinit var loginViewModel: LoginViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        loginViewModel = ViewModelProvider(this)[LoginViewModel::class.java]
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -63,7 +66,7 @@ class MainActivity : AppCompatActivity() {
             navController.navigate(R.id.loginFragment)
             drawerLayout.closeDrawers()
 
-            loginRepository.logout()
+            loginViewModel.logout()
 
             Toast.makeText(applicationContext, "User logged out", Toast.LENGTH_LONG).show()
         }

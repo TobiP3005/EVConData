@@ -50,6 +50,12 @@ class UserPreferencesRepository @Inject constructor(
         }
     }
 
+    suspend fun logoutUser() {
+        dataStore.edit {
+            it.clear()
+        }
+    }
+
 //    fun getSessionTokenFlow(): Flow<String> = dataStore.data
 //        .catch { exception ->
 //            if (exception is IOException) {
