@@ -18,12 +18,14 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.NonNull
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import com.example.evcondata.DrawerLocker
 import com.example.evcondata.R
 import com.example.evcondata.databinding.FragmentLoginBinding
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -61,8 +63,6 @@ class LoginFragment : Fragment() {
         binding.goToRegister.setOnClickListener { view: View ->
             view.findNavController().navigate(LoginFragmentDirections.actionLoginToMyCar())
         }
-
-        googleSignInClient.signOut()
 
         return binding.root
     }
@@ -167,6 +167,9 @@ class LoginFragment : Fragment() {
     }
 
     private fun updateUiWithUser(model: LoggedInUserView) {
+        // Enable Drawer menu
+        (activity as DrawerLocker?)!!.setDrawerEnabled(true)
+
         val welcome = getString(R.string.welcome) + model.displayName
         hideKeyboard()
         activity

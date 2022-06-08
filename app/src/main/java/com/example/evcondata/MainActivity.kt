@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -18,10 +19,11 @@ import com.example.evcondata.databinding.ActivityMainBinding
 import com.example.evcondata.ui.auth.login.LoginViewModel
 import com.google.android.material.navigation.NavigationView
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), DrawerLocker {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
@@ -48,6 +50,8 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_my_car, R.id.myConsumptionFragment, R.id.mapsFragment, R.id.carsListFragment, R.id.publicConsumptionFragment
             ), drawerLayout
         )
+
+        setDrawerEnabled(false)
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
@@ -82,4 +86,13 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
+
+    override fun setDrawerEnabled(enabled: Boolean) {
+        val lockMode = if (enabled) DrawerLayout.LOCK_MODE_UNLOCKED else LOCK_MODE_LOCKED_CLOSED
+        drawer_layout.setDrawerLockMode(lockMode)
+    }
+}
+
+interface DrawerLocker {
+    fun setDrawerEnabled(enabled: Boolean)
 }
