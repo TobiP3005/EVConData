@@ -44,7 +44,7 @@ class LoginFragment : Fragment() {
     private lateinit var loginViewModel: LoginViewModel
     private lateinit var binding: FragmentLoginBinding
 
-    lateinit var googleSignInClient: GoogleSignInClient
+    private lateinit var googleSignInClient: GoogleSignInClient
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -59,6 +59,8 @@ class LoginFragment : Fragment() {
             .requestEmail()
             .build()
         googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
+
+        googleSignInClient.signOut()
 
         binding.goToRegister.setOnClickListener { view: View ->
             view.findNavController().navigate(LoginFragmentDirections.actionLoginToMyCar())
