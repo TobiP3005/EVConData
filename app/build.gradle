@@ -59,8 +59,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.9'
 
     // Couchbase
-    implementation 'com.couchbase.lite:couchbase-lite-android-ee-ktx:3.0.0'
-
+    implementation 'com.couchbase.lite:couchbase-lite-android-ktx:3.0.0'
 
     implementation 'com.fasterxml.jackson.core:jackson-core:2.11.1'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.11.1'
