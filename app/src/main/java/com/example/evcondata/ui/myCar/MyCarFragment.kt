@@ -14,6 +14,8 @@ import androidx.lifecycle.coroutineScope
 import com.example.evcondata.databinding.FragmentMyCarBinding
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 
@@ -24,6 +26,7 @@ class MyCarFragment : Fragment() {
     private lateinit var binding: FragmentMyCarBinding
     private var myCar: String? = null
 
+    @OptIn(InternalCoroutinesApi::class)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

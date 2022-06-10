@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.evcondata.databinding.FragmentPublicConsumptionListBinding
 import com.example.evcondata.ui.consumption.adapter.PublicConsumptionRecyclerViewAdapter
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 /**

@@ -61,7 +61,6 @@ dependencies {
     // Couchbase
     implementation 'com.couchbase.lite:couchbase-lite-android-ee-ktx:3.0.0'
 
-    implementation "com.github.MOLO17:couchbase-lite-kotlin:1.2.0"
 
     implementation 'com.fasterxml.jackson.core:jackson-core:2.11.1'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.11.1'

@@ -20,6 +20,7 @@ import com.example.evcondata.ui.consumption.adapter.MyConsumptionRecyclerViewAda
 import com.example.evcondata.ui.consumption.adapter.SwipeToDeleteCallback
 import com.example.evcondata.ui.consumption.adapter.SwipeToEditCallback
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 /**

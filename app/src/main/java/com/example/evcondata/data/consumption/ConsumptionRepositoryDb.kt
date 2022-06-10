@@ -9,7 +9,6 @@ import com.example.evcondata.model.Consumption
 import com.example.evcondata.model.ConsumptionModelDTO
 import com.example.evcondata.model.ResultCode
 import com.google.gson.Gson
-import com.molo17.couchbase.lite.documentReplicationFlow
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 

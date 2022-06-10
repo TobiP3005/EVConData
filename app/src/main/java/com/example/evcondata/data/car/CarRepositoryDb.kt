@@ -8,7 +8,6 @@ import com.example.evcondata.model.Car
 import com.example.evcondata.model.CarModelDTO
 import com.example.evcondata.model.UserProfile
 import com.google.gson.Gson
-import com.molo17.couchbase.lite.limit
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
@@ -82,7 +81,7 @@ class CarRepositoryDb(private val databaseManager: DatabaseManager, userPreferen
                 .from(it.`as`("item"))
                 .where(Expression.property("name").equalTo(Expression.string(carName))
                 .and(Expression.property("type").equalTo(Expression.string("car"))))
-                .limit(1)
+                .limit(Expression.intValue(1))
         }
         val car = query!!.execute()
             .map { qc -> mapQueryChangeToCar(qc) }

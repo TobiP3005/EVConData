@@ -13,6 +13,8 @@ import androidx.navigation.fragment.NavHostFragment
 import com.example.evcondata.databinding.FragmentCarsListBinding
 import com.example.evcondata.model.Car
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 /**
@@ -45,6 +47,7 @@ class CarsListFragment : Fragment() {
         return binding.root
     }
 
+    @OptIn(InternalCoroutinesApi::class)
     private fun keepConsumptionListUpdated() {
 
         lifecycle.coroutineScope.launch {
