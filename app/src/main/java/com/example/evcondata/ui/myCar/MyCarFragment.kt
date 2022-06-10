@@ -88,7 +88,7 @@ class MyCarFragment : Fragment() {
             binding.itemWltpConsumption.text = String.format("%s kwh", if (car.wltpConsumption == null) "?" else car.wltpConsumption.toString())
             binding.itemBattery.text = String.format("%s kwh", if (car.battery == null) "?" else car.battery.toString())
             binding.itemChargeSpeed.text = String.format("%s kw", if (car.chargeSpeed == null) "?" else car.chargeSpeed.toString())
-            binding.itemAcceleration.text = String.format("%s kw", if (car.acceleration == null) "?" else car.acceleration.toString())
+            binding.itemAcceleration.text = String.format("%s sec", if (car.acceleration == null) "?" else car.acceleration.toString())
 
             Picasso.get().load(car.imageUri).into(binding.itemCarImage)
         }
@@ -110,20 +110,5 @@ class MyCarFragment : Fragment() {
                     )
                 }
         }
-    }
-
-    private fun refresh() {
-        context.let {
-        val fragmentManager = (context as? AppCompatActivity)?.supportFragmentManager
-        fragmentManager?.let {
-            val currentFragment = this
-            currentFragment.let {
-                val fragmentTransaction = fragmentManager.beginTransaction()
-                fragmentTransaction.detach(it)
-                fragmentTransaction.attach(it)
-                fragmentTransaction.commit()
-            }
-        }
-    }
     }
 }

@@ -13,7 +13,7 @@ data class Car(
     var battery: Double?,
     var wltpConsumption: Double?,
     var wltpRange: Int?,
-    var chargeSpeed: Int?,
+    var chargeSpeed: Float?,
     var maxSpeed: Int?,
     var acceleration: Float?,
     var imageUri: String?,
