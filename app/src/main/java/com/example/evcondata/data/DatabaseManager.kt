@@ -3,6 +3,7 @@ package com.example.evcondata.data
 import android.content.Context
 import android.util.Log
 import com.couchbase.lite.*
+import com.example.evcondata.BuildConfig
 import com.example.evcondata.data.auth.UserPreferencesRepository
 import java.net.URI
 import java.net.URISyntaxException
@@ -10,8 +11,6 @@ import java.net.URISyntaxException
 class DatabaseManager(val context: Context, userPreferencesRepository: UserPreferencesRepository){
 
     val userPref = userPreferencesRepository
-
-    private val syncGatewayEndpoint = "ws://adac-icphig-cbtest.germanywestcentral.cloudapp.azure.com:4984"
 
     var evDataDbName = "ev-data"
     private var evDataDatabase: Database? = null
@@ -72,7 +71,7 @@ class DatabaseManager(val context: Context, userPreferencesRepository: UserPrefe
             url = URI(
                 String.format(
                     "%s/%s",
-                    syncGatewayEndpoint,
+                    BuildConfig.BASE_URL_WS,
                     evDataDbName
                 )
             )

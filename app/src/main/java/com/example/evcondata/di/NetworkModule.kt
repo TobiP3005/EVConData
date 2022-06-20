@@ -1,5 +1,6 @@
 package com.example.evcondata.di
 
+import com.example.evcondata.BuildConfig
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -14,7 +15,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-    private const val URL = "http://adac-icphig-cbtest.germanywestcentral.cloudapp.azure.com:4984/"
     @Provides
     @Singleton
     fun provideKotlinJsonAdapterFactory(): KotlinJsonAdapterFactory = KotlinJsonAdapterFactory()
@@ -45,6 +45,6 @@ object NetworkModule {
     ): Retrofit = Retrofit.Builder()
         .addConverterFactory(moshiConverterFactory)
         .client(okHttp)
-        .baseUrl(URL)
+        .baseUrl(BuildConfig.BASE_URL)
         .build()
 }
