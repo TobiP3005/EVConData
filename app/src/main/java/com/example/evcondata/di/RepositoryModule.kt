@@ -8,6 +8,8 @@ import com.example.evcondata.data.car.CarRepository
 import com.example.evcondata.data.car.CarRepositoryDb
 import com.example.evcondata.data.consumption.ConsumptionRepository
 import com.example.evcondata.data.consumption.ConsumptionRepositoryDb
+import com.example.evcondata.data.location.LocationRepository
+import com.example.evcondata.data.location.LocationRepositoryDb
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -37,6 +39,18 @@ object RepositoryModule {
         userPreferencesDataStore: UserPreferencesRepository
     ): CarRepository {
         return CarRepositoryDb(
+            databaseManager = databaseManager,
+            userPreferencesRepository = userPreferencesDataStore
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun provideLocationRepository(
+        databaseManager: DatabaseManager,
+        userPreferencesDataStore: UserPreferencesRepository
+    ): LocationRepository {
+        return LocationRepositoryDb(
             databaseManager = databaseManager,
             userPreferencesRepository = userPreferencesDataStore
         )
