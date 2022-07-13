@@ -19,6 +19,7 @@ class UserPreferencesRepository @Inject constructor(
     private val myCarPrefKey = stringPreferencesKey("myCar")
     private val userIdPrefKey = stringPreferencesKey("userId")
     private val sharedConBoolPrefKey = stringPreferencesKey("sharedConsumptionBool")
+    private val sharedLocationBoolPrefKey = stringPreferencesKey("sharedLocationBool")
 
     suspend fun setSessionToken(sessionToken: String) {
         dataStore.edit { settings ->
@@ -50,64 +51,64 @@ class UserPreferencesRepository @Inject constructor(
         }
     }
 
+    suspend fun setSharedLocationBool(isShared: String) {
+        dataStore.edit { settings ->
+            settings[sharedLocationBoolPrefKey] = isShared
+        }
+    }
+
     suspend fun logoutUser() {
         dataStore.edit {
             it.clear()
         }
     }
 
-//    fun getSessionTokenFlow(): Flow<String> = dataStore.data
-//        .catch { exception ->
-//            if (exception is IOException) {
-//                Log.e(TAG, "Error reading preferences: ", exception)
-//                emit(emptyPreferences())
-//            } else {
-//                throw exception
-//            }
-//        }
-//        .map { pref ->
-//            pref[sessionPrefKey] ?: ""
-//        }
-
-    val sessionToken =
+    fun sessionToken(): String =
         runBlocking {
             dataStore.data.map { preferences ->
                 preferences[sessionPrefKey] ?: ""
             }.first()
         }
 
-    val userId =
+    fun userId(): String =
         runBlocking {
             dataStore.data.map { preferences ->
                 preferences[userIdPrefKey] ?: ""
             }.first()
         }
 
-    val username =
+    fun username(): String =
         runBlocking {
             dataStore.data.map { preferences ->
-                preferences[usernamePrefKey]
-            }.first()
-    }
-
-    val myCar=
-        runBlocking {
-            dataStore.data.map { preferences ->
-                preferences[myCarPrefKey]
+                preferences[usernamePrefKey] ?: ""
             }.first()
         }
+
+    fun myCar(): String = runBlocking {
+        dataStore.data.map { preferences ->
+            preferences[myCarPrefKey] ?: ""
+        }.first()
+    }
 
     val myCarFlow: Flow<String> =
         dataStore.data.map { preferences ->
             preferences[myCarPrefKey] ?: ""
         }.distinctUntilChanged()
 
-    val sharedConsumption =
+    fun sharedConsumption(): Boolean =
         runBlocking {
             dataStore.data.map { preferences ->
                 preferences[sharedConBoolPrefKey]
             }.first().toBoolean()
-    }
+        }
+
+    fun sharedLocation(): Boolean =
+        runBlocking {
+            dataStore.data.map { preferences ->
+                preferences[sharedLocationBoolPrefKey]
+            }.first().toBoolean()
+        }
+
 
     val sharedConFlow: Flow<String> = dataStore.data
         .map { preferences ->
