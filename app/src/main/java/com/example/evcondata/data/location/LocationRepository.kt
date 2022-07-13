@@ -8,6 +8,8 @@ interface LocationRepository {
 
     fun saveLocation(location: Location, id: String): Flow<ResultCode>
 
+    fun deleteLocation(id: String): Flow<ResultCode>
+
     fun getMyLocation(): LocationModelDTO?
 
     fun publishLocation(checked: Boolean)

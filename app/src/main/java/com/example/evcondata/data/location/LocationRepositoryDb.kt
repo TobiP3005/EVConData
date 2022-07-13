@@ -13,6 +13,7 @@ class LocationRepositoryDb(databaseManager: DatabaseManager, userPreferencesRepo
 
     private val userPref = userPreferencesRepository
     private val db = databaseManager.getEvDataDatabase()
+    private val replicator = databaseManager.getReplicator()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getLocationListFlow(): Flow<List<Location>> {
@@ -30,8 +31,27 @@ class LocationRepositoryDb(databaseManager: DatabaseManager, userPreferencesRepo
             .map { qc -> mapQueryChangeToLocationList(qc) }
             .flowOn(Dispatchers.IO)
 
-        query.execute()
+        CoroutineScope(Dispatchers.IO).launch {
+            purgeWorkaround()
+        }
+
         return flow
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private suspend fun purgeWorkaround() {
+        val replicatorFlow = replicator?.documentReplicationFlow()
+            ?.map { update -> update.documents }
+            ?.flowOn(Dispatchers.IO)
+
+        replicatorFlow?.collect { list ->
+            val purgeBool = list.any { it.flags.contains(DocumentFlag.ACCESS_REMOVED) }
+            if (purgeBool){
+                saveLocation(Location("", "", 1.0, 1.0, ""),
+                    "purgeWorkaround").collect()
+                deleteLocation("purgeWorkaround").collect()
+            }
+        }
     }
 
     override fun getMyLocation(): LocationModelDTO? {
@@ -73,6 +93,11 @@ class LocationRepositoryDb(databaseManager: DatabaseManager, userPreferencesRepo
     }
 
     override fun saveLocation(location: Location, id: String): Flow<ResultCode> = flow {
+
+        var userId = userPref.userId()
+        if (id == "purgeWorkaround"){
+            "purgeWorkaround".also { userId = it }
+        }
         try{
             location.username = userPref.username()
             location.owner = userPref.userId()
@@ -80,7 +105,7 @@ class LocationRepositoryDb(databaseManager: DatabaseManager, userPreferencesRepo
             location.published = userPref.sharedLocation()
             db?.let { database ->
                 val json = Gson().toJson(location)
-                val doc = MutableDocument("location-" + userPref.userId(), json)
+                val doc = MutableDocument("location-$userId", json)
                 database.save(doc)
                 emit(ResultCode.SUCCESS)
             }
@@ -88,6 +113,21 @@ class LocationRepositoryDb(databaseManager: DatabaseManager, userPreferencesRepo
             emit(ResultCode.ERROR)
             Log.e(e.message, e.stackTraceToString())
 
+        }
+    }.flowOn(Dispatchers.IO)
+
+    override fun deleteLocation(id: String): Flow<ResultCode> = flow {
+        try {
+            db?.let { database ->
+                val projectDoc = database.getDocument("location-$id")
+                projectDoc?.let { document ->
+                    db.delete(document)
+                    emit(ResultCode.SUCCESS)
+                }
+            }
+        } catch (e: java.lang.Exception) {
+            emit(ResultCode.ERROR)
+            Log.e(e.message, e.stackTraceToString())
         }
     }.flowOn(Dispatchers.IO)
 
