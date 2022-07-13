@@ -9,13 +9,13 @@ import com.google.gson.Gson
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
-class LocationRepositoryDb(private val databaseManager: DatabaseManager, userPreferencesRepository: UserPreferencesRepository) : LocationRepository {
+class LocationRepositoryDb(databaseManager: DatabaseManager, userPreferencesRepository: UserPreferencesRepository) : LocationRepository {
 
     private val userPref = userPreferencesRepository
+    private val db = databaseManager.getEvDataDatabase()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getLocationListFlow(): Flow<List<Location>> {
-        val db = databaseManager.getEvDataDatabase()
         val query = db?.let { DataSource.database(it) }?.let {
             QueryBuilder.select(
                 SelectResult.expression(Meta.id),
@@ -35,7 +35,6 @@ class LocationRepositoryDb(private val databaseManager: DatabaseManager, userPre
     }
 
     override fun getMyLocation(): LocationModelDTO? {
-        val db = databaseManager.getEvDataDatabase()
         val query = db?.let { DataSource.database(it) }?.let {
             QueryBuilder.select(
                 SelectResult.expression(Meta.id),
@@ -59,14 +58,13 @@ class LocationRepositoryDb(private val databaseManager: DatabaseManager, userPre
             userPref.setSharedLocationBool(checked.toString())
         }
 
-        val db = databaseManager.getConsumptionDatabase()
         val docOrigin = db?.getDocument("location-" + userPref.userId())
         if (docOrigin != null) {
             val locationDoc = Gson().fromJson(docOrigin.toJSON(), Location::class.java)
             locationDoc.published = checked
             val json = Gson().toJson(locationDoc)
             val doc = MutableDocument(docOrigin.id, json)
-            db.save(doc)
+            db?.save(doc)
         }
     }
 
@@ -80,7 +78,6 @@ class LocationRepositoryDb(private val databaseManager: DatabaseManager, userPre
             location.owner = userPref.userId()
             location.car = userPref.myCar()
             location.published = userPref.sharedLocation()
-            val db = databaseManager.getConsumptionDatabase()
             db?.let { database ->
                 val json = Gson().toJson(location)
                 val doc = MutableDocument("location-" + userPref.userId(), json)
