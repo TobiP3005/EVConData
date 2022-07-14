@@ -11,7 +11,10 @@ import com.google.gson.Gson
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
-class CarRepositoryDb(private val databaseManager: DatabaseManager, userPreferencesRepository: UserPreferencesRepository) : CarRepository {
+class CarRepositoryDb(
+    private val databaseManager: DatabaseManager,
+    userPreferencesRepository: UserPreferencesRepository
+) : CarRepository {
 
     private val userPref = userPreferencesRepository
 
@@ -36,16 +39,16 @@ class CarRepositoryDb(private val databaseManager: DatabaseManager, userPreferen
         }
     }
 
-    fun configureUserProfile() {
+    private fun configureUserProfile() {
         var myCar: String? = null
-        try{
-            val userID = userPref.userId
+        try {
+            val userID = userPref.userId()
             val db = databaseManager.getConsumptionDatabase()
             val doc = db?.getDocument("userprofile:$userID")
-            if (doc != null){
+            if (doc != null) {
                 myCar = doc.getString("myCar").toString()
             }
-        } catch (e: Exception){
+        } catch (e: Exception) {
             Log.e(e.message, e.stackTraceToString())
         }
 
@@ -60,8 +63,10 @@ class CarRepositoryDb(private val databaseManager: DatabaseManager, userPreferen
         val query = db?.let { DataSource.database(it) }?.let {
             QueryBuilder.select(
                 SelectResult.expression(Meta.id),
-                SelectResult.all())
-                .from(it.`as`("item")).where(Expression.property("type").equalTo(Expression.string("car")))
+                SelectResult.all()
+            )
+                .from(it.`as`("item"))
+                .where(Expression.property("type").equalTo(Expression.string("car")))
         }
         val flow = query!!
             .queryChangeFlow()
@@ -72,32 +77,54 @@ class CarRepositoryDb(private val databaseManager: DatabaseManager, userPreferen
         return flow
     }
 
-    override fun getMyCar(carName: String): Car? {
+    override fun getMyCar(): Car? {
         val db = databaseManager.getEvDataDatabase()
         val query = db?.let { DataSource.database(it) }?.let {
             QueryBuilder.select(
                 SelectResult.expression(Meta.id),
-                SelectResult.all())
+                SelectResult.all()
+            )
                 .from(it.`as`("item"))
-                .where(Expression.property("name").equalTo(Expression.string(carName))
-                .and(Expression.property("type").equalTo(Expression.string("car"))))
+                .where(
+                    Expression.property("name").equalTo(Expression.string(userPref.myCar()))
+                        .and(Expression.property("type").equalTo(Expression.string("car")))
+                )
                 .limit(Expression.intValue(1))
         }
         val car = query!!.execute()
             .map { qc -> mapQueryChangeToCar(qc) }
 
-        if (car.isEmpty()){
+        if (car.isEmpty()) {
             return null
         }
         return car.first()
     }
 
-    override fun getMyCarFlow(): Flow<String> {
-        return userPref.myCarFlow
+    override fun getCar(carName: String): Car? {
+        val db = databaseManager.getEvDataDatabase()
+        val query = db?.let { DataSource.database(it) }?.let {
+            QueryBuilder.select(
+                SelectResult.expression(Meta.id),
+                SelectResult.all()
+            )
+                .from(it.`as`("item"))
+                .where(
+                    Expression.property("name").equalTo(Expression.string(carName))
+                        .and(Expression.property("type").equalTo(Expression.string("car")))
+                )
+                .limit(Expression.intValue(1))
+        }
+        val car = query!!.execute()
+            .map { qc -> mapQueryChangeToCar(qc) }
+
+        if (car.isEmpty()) {
+            return null
+        }
+        return car.first()
     }
 
     override fun setMyCar(myCar: String) {
-        val userID = userPref.userId
+        val userID = userPref.userId()
         val db = databaseManager.getConsumptionDatabase()
         val docOrigin = db?.getDocument("userprofile:$userID")
         if (docOrigin != null) {
@@ -106,8 +133,7 @@ class CarRepositoryDb(private val databaseManager: DatabaseManager, userPreferen
             val json = Gson().toJson(userProfile)
             val doc = MutableDocument(docOrigin.id, json)
             db.save(doc)
-        }
-        else {
+        } else {
             val userProfile = UserProfile(false, myCar, userID)
             val json = Gson().toJson(userProfile)
             val doc = MutableDocument("userprofile:$userID", json)
@@ -127,7 +153,8 @@ class CarRepositoryDb(private val databaseManager: DatabaseManager, userPreferen
                 SelectResult.expression(Expression.property("name"))
             )
                 .from(it)
-                .where(Expression.property("type").equalTo(Expression.string("car"))
+                .where(
+                    Expression.property("type").equalTo(Expression.string("car"))
                 )
         }
         val flow = query!!
@@ -143,7 +170,7 @@ class CarRepositoryDb(private val databaseManager: DatabaseManager, userPreferen
         return flow
     }
 
-    private fun getCarNames(queryChange: QueryChange) : List<String> {
+    private fun getCarNames(queryChange: QueryChange): List<String> {
         val carList = mutableListOf<String>()
         queryChange.results?.let { results ->
             results.forEach { result ->
@@ -153,7 +180,7 @@ class CarRepositoryDb(private val databaseManager: DatabaseManager, userPreferen
         return carList
     }
 
-    private fun mapQueryChangeToCarList(queryChange: QueryChange) : List<Car>{
+    private fun mapQueryChangeToCarList(queryChange: QueryChange): List<Car> {
         val carList = mutableListOf<Car>()
         queryChange.results?.let { results ->
             results.forEach { result ->
@@ -163,10 +190,10 @@ class CarRepositoryDb(private val databaseManager: DatabaseManager, userPreferen
         return carList
     }
 
-    private fun mapQueryChangeToCar(queryChange: Result) : Car?{
+    private fun mapQueryChangeToCar(queryChange: Result): Car? {
         var car: Car?
         queryChange.let { result ->
-                car = Gson().fromJson(result.toJSON(), CarModelDTO::class.java).item
+            car = Gson().fromJson(result.toJSON(), CarModelDTO::class.java).item
         }
         return car
     }

@@ -125,15 +125,11 @@ class MyConsumptionListFragment : Fragment() {
 
     @SuppressLint("NotifyDataSetChanged")
     private fun keepConsumptionListUpdated() {
-
         lifecycle.coroutineScope.launch {
-            consumptionViewModel.myCarFlow
-                .collect { carName ->
-                    consumptionViewModel.myConsumptionList(carName)
-                        .collect { list ->
-                            consumptionListAdapter.setConsumptionList(list)
-                            consumptionListAdapter.notifyDataSetChanged()
-                        }
+            consumptionViewModel.myConsumptionList
+                .collect { list ->
+                    consumptionListAdapter.setConsumptionList(list)
+                    consumptionListAdapter.notifyDataSetChanged()
                 }
         }
     }

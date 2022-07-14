@@ -7,11 +7,9 @@ import kotlinx.coroutines.flow.Flow
 
 interface ConsumptionRepository {
 
-    fun initializeDatabase()
+    fun getMyConsumptionListFlow(): Flow<List<ConsumptionModelDTO>>
 
-    fun getMyConsumptionListFlow(myCar: String): Flow<List<ConsumptionModelDTO>>
-
-    fun getPublicConsumptionListFlow(myCar: String): Flow<List<ConsumptionModelDTO>>
+    fun getPublicConsumptionListFlow(): Flow<List<ConsumptionModelDTO>>
 
     fun getConsumption(id: String): Flow<Consumption?>
 
@@ -25,7 +23,7 @@ interface ConsumptionRepository {
 
     fun sharedConFlow(): Flow<String>
 
-    fun deleteConsumption(id: String) : Flow<ResultCode>
+    fun deleteConsumption(id: String): Flow<ResultCode>
 
     suspend fun deleteDatabase()
 }

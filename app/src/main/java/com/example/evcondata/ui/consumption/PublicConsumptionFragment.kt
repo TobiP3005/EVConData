@@ -55,15 +55,10 @@ class PublicConsumptionFragment : Fragment() {
     private fun keepConsumptionListUpdated() {
 
         lifecycle.coroutineScope.launch {
-            consumptionViewModel.myCarFlow
-                .collect { carName ->
-                    lifecycle.coroutineScope.launch {
-                        consumptionViewModel.publicConsumptionList(carName)
-                            .collect { list ->
-                                consumptionListAdapter.setConsumptionList(list)
-                                consumptionListAdapter.notifyDataSetChanged()
-                            }
-                    }
+            consumptionViewModel.publicConsumptionList
+                .collect { list ->
+                    consumptionListAdapter.setConsumptionList(list)
+                    consumptionListAdapter.notifyDataSetChanged()
                 }
         }
     }

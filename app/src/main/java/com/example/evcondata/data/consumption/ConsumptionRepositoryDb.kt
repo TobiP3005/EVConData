@@ -13,7 +13,10 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 
-class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, userPreferencesRepository: UserPreferencesRepository) : ConsumptionRepository {
+class ConsumptionRepositoryDb(
+    private val databaseManager: DatabaseManager,
+    userPreferencesRepository: UserPreferencesRepository
+) : ConsumptionRepository {
 
     private val userPref = userPreferencesRepository
 
@@ -21,16 +24,16 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
         setSharedConsumptionPref()
     }
 
-    private fun setSharedConsumptionPref(){
+    private fun setSharedConsumptionPref() {
         var shared = "false"
-        try{
-            val userID = userPref.userId
+        try {
+            val userID = userPref.userId()
             val db = databaseManager.getConsumptionDatabase()
             val doc = db?.getDocument("userprofile:$userID")
-            if (doc != null){
+            if (doc != null) {
                 shared = doc.getBoolean("publicConsumption").toString()
             }
-        } catch (e: Exception){
+        } catch (e: Exception) {
             Log.e(e.message, e.stackTraceToString())
         }
 
@@ -48,24 +51,24 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
             val db = databaseManager.getConsumptionDatabase()
             db?.let { database ->
                 val doc = database.getDocument(id)
-                doc?.let { document  ->
+                doc?.let { document ->
                     emit(Gson().fromJson(document.toJSON(), Consumption::class.java))
                 } ?: emit(null)
             }
         } catch (e: Exception) {
             emit(null)
             Log.e(e.message, e.stackTraceToString())
-            }
+        }
     }.flowOn(Dispatchers.IO)
 
-    override fun publishData(publishDataBool: Boolean){
+    override fun publishData(publishDataBool: Boolean) {
 
         CoroutineScope(Dispatchers.IO).launch {
             userPref.setSharedConBool(publishDataBool.toString())
         }
 
         val db = databaseManager.getConsumptionDatabase()
-        val docOrigin = db?.getDocument("userprofile:"+userPref.userId)
+        val docOrigin = db?.getDocument("userprofile:" + userPref.userId())
         if (docOrigin != null) {
             val userProfile = Gson().fromJson(docOrigin.toJSON(), Consumption::class.java)
             userProfile.published = publishDataBool
@@ -77,16 +80,22 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
 
         val query = db?.let { DataSource.database(it) }?.let {
             QueryBuilder.select(
-                SelectResult.expression(Meta.id))
+                SelectResult.expression(Meta.id)
+            )
                 .from(it.`as`("item"))
-                .where(Expression.property("type").equalTo(Expression.string("consumption"))
-                    .and(Expression.property("owner").equalTo(Expression.string(userPref.userId))))
+                .where(
+                    Expression.property("type").equalTo(Expression.string("consumption"))
+                        .and(
+                            Expression.property("owner")
+                                .equalTo(Expression.string(userPref.userId()))
+                        )
+                )
         }
         try {
             val rs = query!!.execute()
             for (result in rs) {
                 val id: String? = result.getString("id")
-                if (id != null){
+                if (id != null) {
                     val doc: MutableDocument = db.getDocument(id)!!.toMutable()
                     doc.setBoolean("published", publishDataBool)
                     db.save(doc)
@@ -98,16 +107,24 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getMyConsumptionListFlow(myCar: String): Flow<List<ConsumptionModelDTO>> {
+    override fun getMyConsumptionListFlow(): Flow<List<ConsumptionModelDTO>> {
         val db = databaseManager.getConsumptionDatabase()
         val query = db?.let { DataSource.database(it) }?.let {
             QueryBuilder.select(
                 SelectResult.expression(Meta.id),
-                SelectResult.all())
+                SelectResult.all()
+            )
                 .from(it.`as`("item"))
-                .where(Expression.property("type").equalTo(Expression.string("consumption"))
-                    .and(Expression.property("owner").equalTo(Expression.string(userPref.userId)))
-                    .and(Expression.property("car").equalTo(Expression.string(myCar))))
+                .where(
+                    Expression.property("type").equalTo(Expression.string("consumption"))
+                        .and(
+                            Expression.property("owner")
+                                .equalTo(Expression.string(userPref.userId()))
+                        )
+                        .and(
+                            Expression.property("car").equalTo(Expression.string(userPref.myCar()))
+                        )
+                )
         }
 
         return query!!
@@ -117,16 +134,23 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getPublicConsumptionListFlow(myCar: String): Flow<List<ConsumptionModelDTO>> {
+    override fun getPublicConsumptionListFlow(): Flow<List<ConsumptionModelDTO>> {
         val db = databaseManager.getConsumptionDatabase()
         val query = db?.let { DataSource.database(it) }?.let {
             QueryBuilder.select(
                 SelectResult.expression(Meta.id),
-                SelectResult.all())
+                SelectResult.all()
+            )
                 .from(it.`as`("item"))
-                .where(Expression.property("type").equalTo(Expression.string("consumption"))
-                    .and(Expression.property("published").equalTo(Expression.booleanValue(true)))
-                    .and(Expression.property("car").equalTo(Expression.string(myCar))))
+                .where(
+                    Expression.property("type").equalTo(Expression.string("consumption"))
+                        .and(
+                            Expression.property("published").equalTo(Expression.booleanValue(true))
+                        )
+                        .and(
+                            Expression.property("car").equalTo(Expression.string(userPref.myCar()))
+                        )
+                )
         }
 
         val flow = query!!
@@ -145,14 +169,24 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
         val db = databaseManager.getConsumptionDatabase()
         val query = db?.let { DataSource.database(it) }?.let {
             QueryBuilder.select(
-                SelectResult.expression(Function.count(Expression.property("consumption"))).`as`("count"),
-                SelectResult.expression(Function.avg(Expression.property("consumption"))).`as`("avg")
+                SelectResult.expression(Function.count(Expression.property("consumption")))
+                    .`as`("count"),
+                SelectResult.expression(Function.avg(Expression.property("consumption")))
+                    .`as`("avg")
 
             )
                 .from(it)
-                .where(Expression.property("car").equalTo(Expression.string(carName))
-                    .and(Expression.property("type").equalTo(Expression.string("consumption")))
-                    .and(Expression.property("published").equalTo(Expression.booleanValue(true)))
+                .where(
+                    Expression.property("car").equalTo(Expression.string(carName))
+                        .and(Expression.property("type").equalTo(Expression.string("consumption")))
+                        .and(
+                            Expression.property("published").equalTo(Expression.booleanValue(true))
+                        )
+                        .and(
+                            (Expression.property("owner")
+                                .notEqualTo(Expression.string(userPref.userId()))
+                                    )
+                        )
                 )
         }
 
@@ -167,14 +201,17 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
         val db = databaseManager.getConsumptionDatabase()
         val query = db?.let { DataSource.database(it) }?.let {
             QueryBuilder.select(
-                SelectResult.expression(Function.count(Expression.property("consumption"))).`as`("count"),
-                SelectResult.expression(Function.avg(Expression.property("consumption"))).`as`("avg")
+                SelectResult.expression(Function.count(Expression.property("consumption")))
+                    .`as`("count"),
+                SelectResult.expression(Function.avg(Expression.property("consumption")))
+                    .`as`("avg")
 
             )
                 .from(it)
-                .where(Expression.property("owner").equalTo(Expression.string(userPref.userId))
-                    .and(Expression.property("car").equalTo(Expression.string(carName)))
-                    .and(Expression.property("type").equalTo(Expression.string("consumption")))
+                .where(
+                    Expression.property("owner").equalTo(Expression.string(userPref.userId()))
+                        .and(Expression.property("car").equalTo(Expression.string(carName)))
+                        .and(Expression.property("type").equalTo(Expression.string("consumption")))
                 )
         }
 
@@ -184,6 +221,7 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
             .flowOn(Dispatchers.IO)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private suspend fun purgeWorkaround() {
         val replicator = databaseManager.getReplicator()
         val replicatorFlow = replicator?.documentReplicationFlow()
@@ -192,25 +230,32 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
 
         replicatorFlow?.collect { list ->
             val purgeBool = list.any { it.flags.contains(DocumentFlag.ACCESS_REMOVED) }
-            if (purgeBool){
-                saveConsumption(Consumption("", "", 0, 0f, 0, 0, 0, ""),
-                    "purgeWorkaround").collect()
+            if (purgeBool) {
+                saveConsumption(
+                    Consumption("", "", 0, 0f, 0, 0, 0, ""),
+                    "purgeWorkaround"
+                ).collect()
                 deleteConsumption("purgeWorkaround").collect()
             }
         }
     }
 
-    private fun mapQueryChangeToConsumptionList(queryChange: QueryChange) : List<ConsumptionModelDTO>{
+    private fun mapQueryChangeToConsumptionList(queryChange: QueryChange): List<ConsumptionModelDTO> {
         val consumptionList = mutableListOf<ConsumptionModelDTO>()
         queryChange.results?.let { results ->
             results.forEach() { result ->
-                consumptionList.add(Gson().fromJson(result.toJSON(), ConsumptionModelDTO::class.java))
+                consumptionList.add(
+                    Gson().fromJson(
+                        result.toJSON(),
+                        ConsumptionModelDTO::class.java
+                    )
+                )
             }
         }
         return consumptionList
     }
 
-    private fun mapQueryChangeToConsumptionFloat(queryChange: QueryChange) : Float?{
+    private fun mapQueryChangeToConsumptionFloat(queryChange: QueryChange): Float? {
         var avg: Float? = null
         queryChange.results?.let { results ->
             val t = results.first()
@@ -221,10 +266,11 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
     }
 
     override fun saveConsumption(consumption: Consumption, id: String): Flow<ResultCode> = flow {
-        try{
-            consumption.username = userPref.username
-            consumption.owner = userPref.userId
-            consumption.published = userPref.sharedConsumption
+        try {
+            consumption.username = userPref.username()
+            consumption.owner = userPref.userId()
+            consumption.car = userPref.myCar()
+            consumption.published = userPref.sharedConsumption()
             val db = databaseManager.getConsumptionDatabase()
             db?.let { database ->
                 val json = Gson().toJson(consumption)
@@ -232,7 +278,7 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
                 database.save(doc)
                 emit(ResultCode.SUCCESS)
             }
-        } catch (e: Exception){
+        } catch (e: Exception) {
             emit(ResultCode.ERROR)
             Log.e(e.message, e.stackTraceToString())
 
@@ -255,12 +301,8 @@ class ConsumptionRepositoryDb(private val databaseManager: DatabaseManager, user
         }
     }.flowOn(Dispatchers.IO)
 
-    override fun initializeDatabase() {
-        return databaseManager.initializeDatabase()
-    }
-
     override suspend fun deleteDatabase() {
-        return withContext(Dispatchers.IO){
+        return withContext(Dispatchers.IO) {
             return@withContext databaseManager.deleteEvDataDatabase()
         }
     }

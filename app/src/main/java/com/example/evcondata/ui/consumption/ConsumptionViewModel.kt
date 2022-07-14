@@ -11,24 +11,20 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 @HiltViewModel
-class ConsumptionViewModel @Inject constructor (
-    private val consumptionRepository: ConsumptionRepository,
-    userPreferencesRepository: UserPreferencesRepository
-    )
-    : ViewModel() {
+class ConsumptionViewModel @Inject constructor(
+    private val consumptionRepository: ConsumptionRepository
+) : ViewModel() {
 
-    val userPref = userPreferencesRepository
+    val myConsumptionList: Flow<List<ConsumptionModelDTO>>
+        get() = consumptionRepository.getMyConsumptionListFlow()
 
-    val myConsumptionList: (myCar: String) -> Flow<List<ConsumptionModelDTO>> = { myCar: String ->
-        consumptionRepository.getMyConsumptionListFlow(myCar)
-    }
-    val publicConsumptionList: (myCar: String) -> Flow<List<ConsumptionModelDTO>> = { myCar: String ->
-        consumptionRepository.getPublicConsumptionListFlow(myCar)
-    }
+    val publicConsumptionList: Flow<List<ConsumptionModelDTO>>
+        get() = consumptionRepository.getPublicConsumptionListFlow()
 
-    val saveConsumption: (Consumption, String) -> Flow<ResultCode> = { item: Consumption, id: String ->
+    val saveConsumption: (Consumption, String) -> Flow<ResultCode> =
+        { item: Consumption, id: String ->
             consumptionRepository.saveConsumption(item, id)
-    }
+        }
 
     val deleteConsumption: (String) -> Flow<ResultCode> = { consumptionId: String ->
         consumptionRepository.deleteConsumption(consumptionId)
@@ -40,11 +36,5 @@ class ConsumptionViewModel @Inject constructor (
 
     val sharedConFlow: Flow<String>
         get() = consumptionRepository.sharedConFlow()
-
-    val myCar: String?
-        get() = userPref.myCar
-
-    val myCarFlow: Flow<String>
-        get() = userPref.myCarFlow
 
 }

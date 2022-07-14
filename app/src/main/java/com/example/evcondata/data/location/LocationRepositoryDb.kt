@@ -9,7 +9,10 @@ import com.google.gson.Gson
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
-class LocationRepositoryDb(databaseManager: DatabaseManager, userPreferencesRepository: UserPreferencesRepository) : LocationRepository {
+class LocationRepositoryDb(
+    databaseManager: DatabaseManager,
+    userPreferencesRepository: UserPreferencesRepository
+) : LocationRepository {
 
     private val userPref = userPreferencesRepository
     private val db = databaseManager.getEvDataDatabase()
@@ -20,12 +23,22 @@ class LocationRepositoryDb(databaseManager: DatabaseManager, userPreferencesRepo
         val query = db?.let { DataSource.database(it) }?.let {
             QueryBuilder.select(
                 SelectResult.expression(Meta.id),
-                SelectResult.all())
+                SelectResult.all()
+            )
                 .from(it.`as`("item"))
-                .where(Expression.property("type").equalTo(Expression.string("location"))
-                    .and(Expression.property("car").equalTo(Expression.string(userPref.myCar())))
-                    .and(Expression.property("published").equalTo(Expression.booleanValue(true)))
-                    .and(Expression.property("owner").notEqualTo(Expression.string(userPref.userId()))))
+                .where(
+                    Expression.property("type").equalTo(Expression.string("location"))
+                        .and(
+                            Expression.property("car").equalTo(Expression.string(userPref.myCar()))
+                        )
+                        .and(
+                            Expression.property("published").equalTo(Expression.booleanValue(true))
+                        )
+                        .and(
+                            Expression.property("owner")
+                                .notEqualTo(Expression.string(userPref.userId()))
+                        )
+                )
         }
         val flow = query!!
             .queryChangeFlow()
@@ -35,7 +48,6 @@ class LocationRepositoryDb(databaseManager: DatabaseManager, userPreferencesRepo
         CoroutineScope(Dispatchers.IO).launch {
             purgeWorkaround()
         }
-
         return flow
     }
 
@@ -47,9 +59,11 @@ class LocationRepositoryDb(databaseManager: DatabaseManager, userPreferencesRepo
 
         replicatorFlow?.collect { list ->
             val purgeBool = list.any { it.flags.contains(DocumentFlag.ACCESS_REMOVED) }
-            if (purgeBool){
-                saveLocation(Location("", "", 1.0, 1.0, ""),
-                    "purgeWorkaround").collect()
+            if (purgeBool) {
+                saveLocation(
+                    Location("", "", 1.0, 1.0, ""),
+                    "purgeWorkaround"
+                ).collect()
                 deleteLocation("purgeWorkaround").collect()
             }
         }
@@ -59,12 +73,18 @@ class LocationRepositoryDb(databaseManager: DatabaseManager, userPreferencesRepo
         val query = db?.let { DataSource.database(it) }?.let {
             QueryBuilder.select(
                 SelectResult.expression(Meta.id),
-                SelectResult.all())
-                .from(it.`as`("item")).where(Expression.property("type").equalTo(Expression.string("location"))
-                    .and(Expression.property("owner").equalTo(Expression.string(userPref.userId()))))
+                SelectResult.all()
+            )
+                .from(it.`as`("item")).where(
+                    Expression.property("type").equalTo(Expression.string("location"))
+                        .and(
+                            Expression.property("owner")
+                                .equalTo(Expression.string(userPref.userId()))
+                        )
+                )
         }
         val res = query!!
-            .execute().map { res -> mapResultToLocation(res)}
+            .execute().map { res -> mapResultToLocation(res) }
 
         return if (res.isNotEmpty()) {
             res.first()
@@ -96,10 +116,10 @@ class LocationRepositoryDb(databaseManager: DatabaseManager, userPreferencesRepo
     override fun saveLocation(location: Location, id: String): Flow<ResultCode> = flow {
 
         var userId = userPref.userId()
-        if (id == "purgeWorkaround"){
+        if (id == "purgeWorkaround") {
             "purgeWorkaround".also { userId = it }
         }
-        try{
+        try {
             location.username = userPref.username()
             location.owner = userPref.userId()
             location.car = userPref.myCar()
@@ -110,15 +130,14 @@ class LocationRepositoryDb(databaseManager: DatabaseManager, userPreferencesRepo
                 database.save(doc)
                 emit(ResultCode.SUCCESS)
             }
-        } catch (e: Exception){
+        } catch (e: Exception) {
             emit(ResultCode.ERROR)
             Log.e(e.message, e.stackTraceToString())
-
         }
     }.flowOn(Dispatchers.IO)
 
     override fun updateCar(carName: String) {
-        try{
+        try {
             db?.let {
                 val doc = db.getDocument("location-${userPref.userId()}")?.toMutable()
                 doc?.setValue("car", carName)
@@ -126,7 +145,7 @@ class LocationRepositoryDb(databaseManager: DatabaseManager, userPreferencesRepo
                     db.save(doc)
                 }
             }
-        } catch (e: Exception){
+        } catch (e: Exception) {
             Log.e(e.message, e.stackTraceToString())
         }
     }
@@ -146,17 +165,22 @@ class LocationRepositoryDb(databaseManager: DatabaseManager, userPreferencesRepo
         }
     }.flowOn(Dispatchers.IO)
 
-    private fun mapQueryChangeToLocationList(queryChange: QueryChange) : List<Location>{
+    private fun mapQueryChangeToLocationList(queryChange: QueryChange): List<Location> {
         val locationList = mutableListOf<Location>()
         queryChange.results?.let { results ->
             results.forEach { result ->
-                locationList.add(Gson().fromJson(result.toJSON(), LocationModelDTO::class.java).item)
+                locationList.add(
+                    Gson().fromJson(
+                        result.toJSON(),
+                        LocationModelDTO::class.java
+                    ).item
+                )
             }
         }
         return locationList
     }
 
-    private fun mapResultToLocation(res: Result) : LocationModelDTO?{
+    private fun mapResultToLocation(res: Result): LocationModelDTO? {
         var location: LocationModelDTO?
         res.let { result ->
             location = Gson().fromJson(result.toJSON(), LocationModelDTO::class.java)
