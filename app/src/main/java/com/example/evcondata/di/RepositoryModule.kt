@@ -38,6 +38,7 @@ object RepositoryModule {
         databaseManager: DatabaseManager,
         userPreferencesDataStore: UserPreferencesRepository
     ): CarRepository {
+        databaseManager.initializeDatabase()
         return CarRepositoryDb(
             databaseManager = databaseManager,
             userPreferencesRepository = userPreferencesDataStore
