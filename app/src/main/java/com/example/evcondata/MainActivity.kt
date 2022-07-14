@@ -9,11 +9,13 @@ import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.example.evcondata.data.DatabaseManager
 import com.example.evcondata.data.auth.UserPreferencesRepository
 import com.example.evcondata.databinding.ActivityMainBinding
 import com.example.evcondata.ui.auth.login.LoginViewModel
@@ -28,7 +30,10 @@ class MainActivity : AppCompatActivity(), DrawerLocker {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     @Inject lateinit var userPreferencesRepository: UserPreferencesRepository
+    @Inject lateinit var databaseManager: DatabaseManager
     lateinit var loginViewModel: LoginViewModel
+
+    lateinit var navController :NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +47,7 @@ class MainActivity : AppCompatActivity(), DrawerLocker {
 
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
+        navController = findNavController(R.id.nav_host_fragment_content_main)
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
@@ -74,6 +79,11 @@ class MainActivity : AppCompatActivity(), DrawerLocker {
 
             Toast.makeText(applicationContext, "User logged out", Toast.LENGTH_LONG).show()
         }
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        databaseManager.checkReplicator()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

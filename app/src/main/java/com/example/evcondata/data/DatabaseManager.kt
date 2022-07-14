@@ -25,8 +25,8 @@ class DatabaseManager(val context: Context, userPreferencesRepository: UserPrefe
     }
 
     fun initializeDatabase() {
-        initEvDataDatabase(context, userPref.userId)
-        startPullReplication()
+        initEvDataDatabase(context, userPref.userId())
+        startPushPullReplication()
     }
 
     fun deleteEvDataDatabase() {
@@ -63,8 +63,7 @@ class DatabaseManager(val context: Context, userPreferencesRepository: UserPrefe
         return evDataDatabase
     }
 
-    // tag::startPushAndPullReplicationForCurrentUser[]
-    private fun startPullReplication()
+    fun startPushPullReplication()
     {
         var url: URI? = null
         try {
@@ -79,7 +78,7 @@ class DatabaseManager(val context: Context, userPreferencesRepository: UserPrefe
             e.printStackTrace()
         }
 
-        val sessionToken = userPref.sessionToken
+        val sessionToken = userPref.sessionToken()
         Replicator(
             ReplicatorConfigurationFactory.create(
                 database = evDataDatabase,
@@ -102,5 +101,11 @@ class DatabaseManager(val context: Context, userPreferencesRepository: UserPrefe
         }
 
         replicator?.start()
+    }
+
+    fun checkReplicator() {
+        if (getReplicator()?.status?.activityLevel == ReplicatorActivityLevel.STOPPED) {
+            startPushPullReplication()
+        }
     }
 }

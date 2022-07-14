@@ -35,10 +35,11 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideDatabase(@ApplicationContext app: Context, userPreferencesDataStore: UserPreferencesRepository): DatabaseManager {
-        val dbManager = DatabaseManager(app, userPreferencesDataStore)
-        dbManager.initializeDatabase()
-        return dbManager
+    fun provideDatabase(
+        @ApplicationContext app: Context,
+        userPreferencesDataStore: UserPreferencesRepository
+    ): DatabaseManager {
+        return DatabaseManager(app, userPreferencesDataStore)
     }
 
     @Singleton
