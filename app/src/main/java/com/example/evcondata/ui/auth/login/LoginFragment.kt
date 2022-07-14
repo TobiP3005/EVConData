@@ -153,6 +153,10 @@ class LoginFragment : Fragment() {
             val signInIntent = this.googleSignInClient.signInIntent
             resultLauncher.launch(signInIntent)
         }
+
+        offline_button.setOnClickListener {
+            findNavController().navigate(LoginFragmentDirections.actionLoginToMyCar())
+        }
     }
 
     private fun handleSignInResult(@NonNull completedTask: Task<GoogleSignInAccount>) {
