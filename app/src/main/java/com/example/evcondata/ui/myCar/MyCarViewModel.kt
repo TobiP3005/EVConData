@@ -28,6 +28,7 @@ class MyCarViewModel @Inject constructor (
 
     fun setMyCar(carName: String) {
         carRepository.setMyCar(carName)
+        locationRepository.updateCar(carName)
     }
 
     val carNames: Flow<List<String>>

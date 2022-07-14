@@ -23,8 +23,9 @@ class LocationRepositoryDb(databaseManager: DatabaseManager, userPreferencesRepo
                 SelectResult.all())
                 .from(it.`as`("item"))
                 .where(Expression.property("type").equalTo(Expression.string("location"))
-                    .and(Expression.property("car").equalTo(Expression.string(userPref.myCar()))
-                    .and(Expression.property("owner").notEqualTo(Expression.string(userPref.userId())))))
+                    .and(Expression.property("car").equalTo(Expression.string(userPref.myCar())))
+                    .and(Expression.property("published").equalTo(Expression.booleanValue(true)))
+                    .and(Expression.property("owner").notEqualTo(Expression.string(userPref.userId()))))
         }
         val flow = query!!
             .queryChangeFlow()
@@ -115,6 +116,20 @@ class LocationRepositoryDb(databaseManager: DatabaseManager, userPreferencesRepo
 
         }
     }.flowOn(Dispatchers.IO)
+
+    override fun updateCar(carName: String) {
+        try{
+            db?.let {
+                val doc = db.getDocument("location-${userPref.userId()}")?.toMutable()
+                doc?.setValue("car", carName)
+                if (doc != null) {
+                    db.save(doc)
+                }
+            }
+        } catch (e: Exception){
+            Log.e(e.message, e.stackTraceToString())
+        }
+    }
 
     override fun deleteLocation(id: String): Flow<ResultCode> = flow {
         try {

@@ -15,4 +15,6 @@ interface LocationRepository {
     fun publishLocation(checked: Boolean)
 
     fun isLocationShared() : Boolean
+
+    fun updateCar(carName: String)
 }
