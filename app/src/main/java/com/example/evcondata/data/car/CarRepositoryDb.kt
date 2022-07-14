@@ -18,45 +18,6 @@ class CarRepositoryDb(
 
     private val userPref = userPreferencesRepository
 
-    init {
-        waitForReplicator()
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private fun waitForReplicator() {
-        val replicator = databaseManager.getReplicator()
-        val replicatorFlow = replicator?.replicatorChangesFlow()
-            ?.map { update -> update.status }
-            ?.flowOn(Dispatchers.IO)
-
-        CoroutineScope(Dispatchers.IO).launch {
-            replicatorFlow?.cancellable()?.collect { status ->
-                if (status.activityLevel == ReplicatorActivityLevel.IDLE) {
-                    configureUserProfile()
-                    this.cancel()
-                }
-            }
-        }
-    }
-
-    private fun configureUserProfile() {
-        var myCar: String? = null
-        try {
-            val userID = userPref.userId()
-            val db = databaseManager.getConsumptionDatabase()
-            val doc = db?.getDocument("userprofile:$userID")
-            if (doc != null) {
-                myCar = doc.getString("myCar").toString()
-            }
-        } catch (e: Exception) {
-            Log.e(e.message, e.stackTraceToString())
-        }
-
-        CoroutineScope(Dispatchers.IO).launch {
-            myCar?.let { userPref.setMyCar(it) }
-        }
-    }
-
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getCarListFlow(): Flow<List<Car>> {
         val db = databaseManager.getEvDataDatabase()
@@ -126,15 +87,12 @@ class CarRepositoryDb(
     override fun setMyCar(myCar: String) {
         val userID = userPref.userId()
         val db = databaseManager.getConsumptionDatabase()
-        val docOrigin = db?.getDocument("userprofile:$userID")
-        if (docOrigin != null) {
-            val userProfile = Gson().fromJson(docOrigin.toJSON(), UserProfile::class.java)
-            userProfile.myCar = myCar
-            val json = Gson().toJson(userProfile)
-            val doc = MutableDocument(docOrigin.id, json)
+        val doc = db?.getDocument("userprofile:$userID")?.toMutable()
+        if (doc != null) {
+            doc.setString("myCar", myCar)
             db.save(doc)
         } else {
-            val userProfile = UserProfile(false, myCar, userID)
+            val userProfile = UserProfile(false, false, myCar, userID)
             val json = Gson().toJson(userProfile)
             val doc = MutableDocument("userprofile:$userID", json)
             db?.save(doc)

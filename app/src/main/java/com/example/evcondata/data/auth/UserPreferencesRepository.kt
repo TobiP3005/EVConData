@@ -45,15 +45,15 @@ class UserPreferencesRepository @Inject constructor(
         }
     }
 
-    suspend fun setSharedConBool(shared: String) {
+    suspend fun setSharedConBool(shared: Boolean) {
         dataStore.edit { settings ->
-            settings[sharedConBoolPrefKey] = shared
+            settings[sharedConBoolPrefKey] = shared.toString()
         }
     }
 
-    suspend fun setSharedLocationBool(isShared: String) {
+    suspend fun setSharedLocationBool(isShared: Boolean) {
         dataStore.edit { settings ->
-            settings[sharedLocationBoolPrefKey] = isShared
+            settings[sharedLocationBoolPrefKey] = isShared.toString()
         }
     }
 

@@ -5,6 +5,11 @@ import android.util.Log
 import com.couchbase.lite.*
 import com.example.evcondata.BuildConfig
 import com.example.evcondata.data.auth.UserPreferencesRepository
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import java.net.URI
 import java.net.URISyntaxException
 
@@ -27,6 +32,52 @@ class DatabaseManager(val context: Context, userPreferencesRepository: UserPrefe
     fun initializeDatabase() {
         initEvDataDatabase(context, userPref.userId())
         startPushPullReplication()
+        waitForReplicator()
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun waitForReplicator() {
+        val replicatorFlow = replicator?.replicatorChangesFlow()
+            ?.map { update -> update.status }
+            ?.flowOn(Dispatchers.IO)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            replicatorFlow?.cancellable()?.collect { status ->
+                if (status.activityLevel == ReplicatorActivityLevel.IDLE) {
+                    configureUserProfile()
+                    this.cancel()
+                }
+            }
+        }
+    }
+
+    private fun configureUserProfile() {
+        var myCar: String? = null
+        var publishConsumption: Boolean? = null
+        var publishLocation: Boolean? = null
+        try {
+            val userID = userPref.userId()
+            val doc = evDataDatabase?.getDocument("userprofile:$userID")
+            if (doc != null) {
+                myCar = doc.getString("myCar").toString()
+                publishConsumption = doc.getBoolean("publishConsumption")
+                publishLocation = doc.getBoolean("publishLocation")
+            }
+        } catch (e: Exception) {
+            Log.e(e.message, e.stackTraceToString())
+        }
+
+        CoroutineScope(Dispatchers.IO).launch {
+            if (myCar != null) {
+                userPref.setMyCar(myCar)
+            }
+            if (publishLocation != null) {
+                userPref.setSharedLocationBool(publishLocation)
+            }
+            if (publishConsumption != null) {
+                userPref.setSharedConBool(publishConsumption)
+            }
+        }
     }
 
     fun deleteEvDataDatabase() {
@@ -63,7 +114,7 @@ class DatabaseManager(val context: Context, userPreferencesRepository: UserPrefe
         return evDataDatabase
     }
 
-    fun startPushPullReplication()
+    private fun startPushPullReplication()
     {
         var url: URI? = null
         try {

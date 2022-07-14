@@ -96,7 +96,15 @@ class LocationRepositoryDb(
     override fun publishLocation(checked: Boolean) {
 
         CoroutineScope(Dispatchers.IO).launch {
-            userPref.setSharedLocationBool(checked.toString())
+            userPref.setSharedLocationBool(checked)
+        }
+
+        val userId = userPref.userId()
+
+        val doc = db?.getDocument("userprofile:$userId")?.toMutable()
+        if (doc != null) {
+            doc.setBoolean("publishLocation", checked)
+            db?.save(doc)
         }
 
         val docOrigin = db?.getDocument("location-" + userPref.userId())

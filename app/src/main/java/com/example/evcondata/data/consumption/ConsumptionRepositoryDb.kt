@@ -8,6 +8,7 @@ import com.example.evcondata.data.auth.UserPreferencesRepository
 import com.example.evcondata.model.Consumption
 import com.example.evcondata.model.ConsumptionModelDTO
 import com.example.evcondata.model.ResultCode
+import com.example.evcondata.model.UserProfile
 import com.google.gson.Gson
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -25,13 +26,13 @@ class ConsumptionRepositoryDb(
     }
 
     private fun setSharedConsumptionPref() {
-        var shared = "false"
+        var shared = false
         try {
             val userID = userPref.userId()
             val db = databaseManager.getConsumptionDatabase()
             val doc = db?.getDocument("userprofile:$userID")
             if (doc != null) {
-                shared = doc.getBoolean("publicConsumption").toString()
+                shared = doc.getBoolean("publishConsumption")
             }
         } catch (e: Exception) {
             Log.e(e.message, e.stackTraceToString())
@@ -64,14 +65,14 @@ class ConsumptionRepositoryDb(
     override fun publishData(publishDataBool: Boolean) {
 
         CoroutineScope(Dispatchers.IO).launch {
-            userPref.setSharedConBool(publishDataBool.toString())
+            userPref.setSharedConBool(publishDataBool)
         }
 
         val db = databaseManager.getConsumptionDatabase()
         val docOrigin = db?.getDocument("userprofile:" + userPref.userId())
         if (docOrigin != null) {
-            val userProfile = Gson().fromJson(docOrigin.toJSON(), Consumption::class.java)
-            userProfile.published = publishDataBool
+            val userProfile = Gson().fromJson(docOrigin.toJSON(), UserProfile::class.java)
+            userProfile.publishConsumption = publishDataBool
 
             val json = Gson().toJson(userProfile)
             val doc = MutableDocument(docOrigin.id, json)
