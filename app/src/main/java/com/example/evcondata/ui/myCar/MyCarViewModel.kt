@@ -13,6 +13,7 @@ import javax.inject.Inject
 class MyCarViewModel @Inject constructor (
     private val carRepository: CarRepository,
     private val consumptionRepository: ConsumptionRepository,
+    private val locationRepository: LocationRepository,
     userPreferencesRepository: UserPreferencesRepository
 )
     : ViewModel() {
