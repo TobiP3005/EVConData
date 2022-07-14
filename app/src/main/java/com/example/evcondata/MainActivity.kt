@@ -1,5 +1,8 @@
 package com.example.evcondata
 
+import android.app.Activity
+import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.os.Bundle
 import android.view.Menu
 import android.widget.Button
@@ -23,6 +26,7 @@ import com.google.android.material.navigation.NavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), DrawerLocker {
@@ -76,9 +80,19 @@ class MainActivity : AppCompatActivity(), DrawerLocker {
             drawerLayout.closeDrawers()
 
             loginViewModel.logout()
-
             Toast.makeText(applicationContext, "User logged out", Toast.LENGTH_LONG).show()
+
+            restartApp()
         }
+    }
+
+    private fun restartApp() {
+        val intent = Intent(this, MainActivity::class.java)
+        intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
+        this.startActivity(intent)
+        (this as Activity).finish()
+
+        Runtime.getRuntime().exit(0)
     }
 
     override fun onRestart() {

@@ -9,6 +9,7 @@ import java.io.IOException
 import javax.inject.Inject
 import kotlin.system.exitProcess
 
+
 /**
  * Class that handles authentication w/ login credentials and retrieves user information.
  */
@@ -56,10 +57,5 @@ class LoginDataSource @Inject constructor(private val userServices: UserServices
                 return@withContext AuthResult.Error(IOException("Error logging in", e))
             }
         }
-    }
-
-    fun logout() {
-        exitProcess(-1)
-        // TODO: revoke authentication
     }
 }

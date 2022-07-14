@@ -63,7 +63,7 @@ class LoginViewModel @Inject constructor(private val loginRepository: LoginRepos
     fun logout() {
         CoroutineScope(Dispatchers.IO).launch {
             userPreferencesRepository.logoutUser()
-            loginRepository.logout()
+            //loginRepository.logout()
         }
     }
 
