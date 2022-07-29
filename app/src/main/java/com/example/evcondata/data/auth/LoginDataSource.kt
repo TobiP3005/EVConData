@@ -7,7 +7,6 @@ import kotlinx.coroutines.withContext
 import okhttp3.Credentials
 import java.io.IOException
 import javax.inject.Inject
-import kotlin.system.exitProcess
 
 
 /**

@@ -68,5 +68,5 @@
     <string name="me">Me</string>
     <string name="community">Community</string>
     <string name="publish">Publish</string>
-    <string name="offline">OFFLINE</string>
+    <string name="skip">SKIP</string>
 </resources>
