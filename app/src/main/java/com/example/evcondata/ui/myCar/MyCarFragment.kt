@@ -13,8 +13,8 @@ import androidx.lifecycle.coroutineScope
 import com.example.evcondata.databinding.FragmentMyCarBinding
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.math.RoundingMode
 
 
 @AndroidEntryPoint
@@ -121,7 +121,7 @@ class MyCarFragment : Fragment() {
                 .collect { avg ->
                     binding.itemCommunityConsumption.text = String.format(
                         "%s kwh",
-                        avg?.toString() ?: "?"
+                        avg?.toBigDecimal()?.setScale(1, RoundingMode.HALF_EVEN) ?: "?"
                     )
                 }
         }
@@ -131,7 +131,7 @@ class MyCarFragment : Fragment() {
                 .collect { avg ->
                     binding.itemMyConsumption.text = String.format(
                         "%s kwh",
-                        avg?.toString() ?: "?"
+                        avg?.toBigDecimal()?.setScale(1, RoundingMode.HALF_EVEN) ?: "?"
                     )
                 }
         }
