@@ -7,12 +7,20 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.coroutineScope
 import com.example.evcondata.databinding.FragmentCarDetailBinding
 import com.example.evcondata.model.Car
+import com.example.evcondata.ui.myCar.MyCarViewModel
 import com.squareup.picasso.Picasso
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import java.math.RoundingMode
 
+@AndroidEntryPoint
 class CarDetailFragment : Fragment() {
 
+    private val myCarViewModel: MyCarViewModel by viewModels()
     private lateinit var binding: FragmentCarDetailBinding
     private lateinit var car: Car
 
@@ -36,6 +44,17 @@ class CarDetailFragment : Fragment() {
 
         loadCarImage()
 
+        lifecycle.coroutineScope.launch {
+            car.name?.let {
+                myCarViewModel.getAvgConsumption(it)
+                    .collect { avg ->
+                        binding.itemCommunityConsumption.text = String.format(
+                            "%s kwh",
+                            avg?.toBigDecimal()?.setScale(1, RoundingMode.HALF_EVEN) ?: "?"
+                        )
+                    }
+            }
+        }
         return binding.root
     }
 
