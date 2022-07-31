@@ -7,13 +7,12 @@ import com.example.evcondata.BuildConfig
 import com.example.evcondata.data.auth.UserPreferencesRepository
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.cancellable
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import java.net.URI
 import java.net.URISyntaxException
 
-class DatabaseManager(val context: Context, userPreferencesRepository: UserPreferencesRepository){
+class DatabaseManager(val context: Context, userPreferencesRepository: UserPreferencesRepository) {
 
     val userPref = userPreferencesRepository
 
@@ -31,6 +30,7 @@ class DatabaseManager(val context: Context, userPreferencesRepository: UserPrefe
 
     fun initializeDatabase() {
         initEvDataDatabase(context, userPref.userId())
+        createIndices()
         startPushPullReplication()
         waitForReplicator()
     }
@@ -82,11 +82,11 @@ class DatabaseManager(val context: Context, userPreferencesRepository: UserPrefe
 
     fun deleteEvDataDatabase() {
         try {
-            if (Database.exists(evDataDbName, context.filesDir)){
+            if (Database.exists(evDataDbName, context.filesDir)) {
                 evDataDatabase?.close()
                 Database.delete(evDataDbName, context.filesDir)
             }
-        } catch (e: Exception){
+        } catch (e: Exception) {
             Log.e(e.message, e.stackTraceToString())
         }
     }
@@ -114,8 +114,7 @@ class DatabaseManager(val context: Context, userPreferencesRepository: UserPrefe
         return evDataDatabase
     }
 
-    private fun startPushPullReplication()
-    {
+    private fun startPushPullReplication() {
         var url: URI? = null
         try {
             url = URI(
@@ -150,7 +149,6 @@ class DatabaseManager(val context: Context, userPreferencesRepository: UserPrefe
                 Log.e("Rep Scheduler  Log", "ReplicationTag Stopped")
             }
         }
-
         replicator?.start()
     }
 
@@ -158,5 +156,53 @@ class DatabaseManager(val context: Context, userPreferencesRepository: UserPrefe
         if (getReplicator()?.status?.activityLevel == ReplicatorActivityLevel.STOPPED) {
             startPushPullReplication()
         }
+    }
+
+    private fun createIndices() {
+        evDataDatabase?.createIndex(
+            "idx_type",
+            IndexBuilder.valueIndex(
+                ValueIndexItem.property("type"),
+            )
+        )
+        evDataDatabase?.createIndex(
+            "idx_typeName",
+            IndexBuilder.valueIndex(
+                ValueIndexItem.property("type"),
+                ValueIndexItem.property("name")
+            )
+        )
+        evDataDatabase?.createIndex(
+            "idx_typeOwner",
+            IndexBuilder.valueIndex(
+                ValueIndexItem.property("type"),
+                ValueIndexItem.property("owner"),
+            )
+        )
+        evDataDatabase?.createIndex(
+            "idx_typeCarOwner",
+            IndexBuilder.valueIndex(
+                ValueIndexItem.property("type"),
+                ValueIndexItem.property("car"),
+                ValueIndexItem.property("owner"),
+            )
+        )
+        evDataDatabase?.createIndex(
+            "idx_typeCarPublished",
+            IndexBuilder.valueIndex(
+                ValueIndexItem.property("type"),
+                ValueIndexItem.property("car"),
+                ValueIndexItem.property("published")
+            )
+        )
+        evDataDatabase?.createIndex(
+            "idx_typeCarPublishedOwner",
+            IndexBuilder.valueIndex(
+                ValueIndexItem.property("type"),
+                ValueIndexItem.property("car"),
+                ValueIndexItem.property("published"),
+                ValueIndexItem.property("owner"),
+            )
+        )
     }
 }
