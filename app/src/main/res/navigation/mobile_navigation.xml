@@ -3,11 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_my_car">
+    app:startDestination="@+id/loginFragment">
 
     <fragment
         android:id="@+id/nav_my_car"
-        android:name="com.example.evcondata.ui.home.MyCarFragment"
+        android:name="com.example.evcondata.ui.myCar.MyCarFragment"
         android:label="@string/menu_my_car"
         tools:layout="@layout/fragment_my_car" />
 
@@ -18,19 +18,70 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/nav_gallery"
-        android:name="com.example.evcondata.ui.gallery.GalleryFragment"
-        android:label="@string/menu_gallery"
-        tools:layout="@layout/fragment_gallery" />
-
-    <fragment
-        android:id="@+id/nav_slideshow"
-        android:name="com.example.evcondata.ui.slideshow.SlideshowFragment"
-        android:label="@string/menu_slideshow"
-        tools:layout="@layout/fragment_slideshow" />
-    <fragment
         android:id="@+id/mapsFragment"
-        android:name="com.example.evcondata.MapsFragment"
-        android:label="fragment_maps"
+        android:name="com.example.evcondata.ui.map.MapsFragment"
+        android:label="Community Map"
         tools:layout="@layout/fragment_maps" />
+    <fragment
+        android:id="@+id/myConsumptionFragment"
+        android:name="com.example.evcondata.ui.consumption.MyConsumptionListFragment"
+        android:label="My Consumption"
+        tools:layout="@layout/fragment_my_consumption" >
+        <action
+            android:id="@+id/navigateToAddConsumptionFragment"
+            app:destination="@id/addConsumptionFragment" />
+        <action
+            android:id="@+id/action_myConsumptionFragment_to_addConsumptionFragment"
+            app:destination="@id/addConsumptionFragment" />
+        <argument
+            android:name="consumptionEntry"
+            app:argType="com.example.evcondata.model.Consumption" />
+    </fragment>
+    <fragment
+        android:id="@+id/addConsumptionFragment"
+        android:name="com.example.evcondata.ui.consumption.AddEditConsumptionFragment"
+        android:label="New Trip"
+        tools:layout="@layout/fragment_add_consumption" >
+        <action
+            android:id="@+id/navigateToMyConsumptionFragment"
+            app:destination="@id/myConsumptionFragment" />
+        <argument
+            android:name="consumptionEntry"
+            app:argType="com.example.evcondata.model.ConsumptionModelDTO" />
+    </fragment>
+    <fragment
+        android:id="@+id/carsListFragment"
+        android:name="com.example.evcondata.ui.car.CarsListFragment"
+        android:label="Electric Cars"
+        tools:layout="@layout/fragment_cars_list" >
+        <action
+            android:id="@+id/action_carsListFragment_to_carFragment"
+            app:destination="@id/carDetailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/carDetailFragment"
+        android:name="com.example.evcondata.CarDetailFragment"
+        android:label="Car"
+        tools:layout="@layout/fragment_car_detail" >
+        <argument
+            android:name="car"
+            app:argType="com.example.evcondata.model.Car" />
+    </fragment>
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.example.evcondata.ui.auth.login.LoginFragment"
+        android:label="Login"
+        tools:layout="@layout/fragment_login">
+<!--        <action-->
+<!--            android:id="@+id/action_nav_login_to_registerFragment"-->
+<!--            app:destination="@id/registerFragment" />-->
+        <action
+            android:id="@+id/action_login_to_myCar"
+            app:destination="@id/nav_my_car" />
+    </fragment>
+    <fragment
+        android:id="@+id/publicConsumptionFragment"
+        android:name="com.example.evcondata.ui.consumption.PublicConsumptionFragment"
+        android:label="Community Consumption"
+        tools:layout="@layout/fragment_public_consumption_list" />
 </navigation>
